@@ -20,7 +20,7 @@ function prompt(prefix: string): Promise<string> {
 
 async function runAgent(proxyUrl?: string): Promise<void> {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
-  const capture = new FFmpegCapture(2560, 1440, 30, 5);
+  const capture = new FFmpegCapture(2560, 1440, 60, 3);
   
   // Limit frame buffer to prevent memory leak
   let lastFrame: Buffer | null = null;
