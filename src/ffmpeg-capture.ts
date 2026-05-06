@@ -31,7 +31,10 @@ export class FFmpegCapture {
       'pipe:1'                   // Output to stdout
     ];
 
-    this.process = spawn('ffmpeg', args, {
+    // Try to find ffmpeg
+    const ffmpegPath = 'C:\\ffmpeg\\bin\\ffmpeg.exe';
+    
+    this.process = spawn(ffmpegPath, args, {
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true
     });
