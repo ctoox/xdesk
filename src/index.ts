@@ -4,6 +4,7 @@ import { SignalMessage } from './message';
 import { ScreenCapture } from './capture';
 import { InputController } from './input';
 import { ScreenViewer } from './viewer';
+import { ShellManager, executeCommand } from './shell';
 
 const SIGNAL_URL = 'wss://xdesk.ctoocn.workers.dev/ws?room=test';
 
@@ -82,26 +83,30 @@ async function runAgent(proxyUrl?: string): Promise<void> {
           switch (action) {
             case 'move': input.moveMouse(x, y); break;
             case 'click': input.mouseClick(x, y, button || 'left'); break;
-            case 'down': input.mouseDown(button || 'left'); break;
-            case 'up': input.mouseUp(button || 'left'); break;
-            case 'drag': input.mouseDrag(x, y); break;
-            case 'scroll':
-              input.scrollMouse(x || screenSize.width / 2, y || screenSize.height / 2, direction || 'down');
-              break;
+            case 'scroll': input.scrollMouse(direction || 'down'); break;
           }
         }
         break;
         
       case 'key':
         if (msg.data) {
-          const { action, key, modifiers, text } = msg.data;
+          const { action, key, text } = msg.data;
           switch (action) {
             case 'press': input.keyPress(key); break;
-            case 'down': input.keyDown(key); break;
-            case 'up': input.keyUp(key); break;
-            case 'combo': input.keyPress(key, modifiers || []); break;
             case 'type': input.typeText(text || ''); break;
           }
+        }
+        break;
+
+      case 'shell':
+        if (msg.data?.command) {
+          executeCommand(msg.data.command).then(output => {
+            client.send({
+              type: 'test',
+              to: msg.id!,
+              data: { message: output }
+            });
+          });
         }
         break;
     }
@@ -110,13 +115,9 @@ async function runAgent(proxyUrl?: string): Promise<void> {
   console.log('');
   console.log('Commands:');
   console.log('  peers              - List online peers');
-  console.log('  send <id> <msg>    - Send message');
-  console.log('  capture            - Test screenshot');
   console.log('  stream             - Start screen sharing');
   console.log('  stop               - Stop sharing');
   console.log('  fps <n>            - Set FPS (1-60)');
-  console.log('  quality <n>        - Set quality (1-100)');
-  console.log('  scale <n>          - Set scale (0.1-1.0)');
   console.log('  quit               - Exit');
   console.log('');
 
@@ -131,17 +132,6 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         const peers = client.getPeers();
         if (peers.length === 0) console.log('No peers online');
         else peers.forEach(p => console.log(`  ${p}`));
-        break;
-      case 'send':
-        if (parts.length < 3) console.log('Usage: send <id> <message>');
-        else { client.sendTest(parts[1], parts.slice(2).join(' ')); console.log(`Sent to ${parts[1]}`); }
-        break;
-      case 'capture':
-        try {
-          console.log('Capturing screen...');
-          const frame = await capture.captureOnce();
-          console.log(`Captured! Size: ${Math.round(frame.length / 1024)} KB`);
-        } catch (e) { console.error('Capture failed:', e); }
         break;
       case 'stream':
         console.log('Starting screen stream...');
@@ -168,14 +158,6 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         if (parts[1]) capture.setFps(parseInt(parts[1]));
         else console.log(`Current FPS: ${capture.getStats().fps}`);
         break;
-      case 'quality':
-        if (parts[1]) capture.setQuality(parseInt(parts[1]));
-        else console.log(`Current quality: ${capture.getStats().quality}%`);
-        break;
-      case 'scale':
-        if (parts[1]) capture.setScale(parseFloat(parts[1]));
-        else console.log(`Current scale: ${capture.getStats().scale}`);
-        break;
       default:
         if (inputCmd.trim()) console.log('Unknown command');
     }
@@ -189,6 +171,7 @@ async function runAgent(proxyUrl?: string): Promise<void> {
 async function runController(proxyUrl?: string): Promise<void> {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
   const viewer = new ScreenViewer(8080);
+  const shell = new ShellManager();
   let viewerStarted = false;
   
   try {
@@ -215,10 +198,8 @@ async function runController(proxyUrl?: string): Promise<void> {
   let lastFpsTime = Date.now();
   let currentFps = 0;
 
-  // Handle browser input events
   viewer.setInputCallback((type, data) => {
     if (!targetPeer) return;
-    
     if (type === 'mouse') {
       client.send({ type: 'mouse', to: targetPeer, data });
     } else if (type === 'key') {
@@ -226,13 +207,24 @@ async function runController(proxyUrl?: string): Promise<void> {
     }
   });
 
+  viewer.setShellCallback((command) => {
+    if (!targetPeer) {
+      viewer.appendShellOutput('Error: No target connected\n');
+      return;
+    }
+    client.send({ type: 'shell', to: targetPeer, data: { command } });
+  });
+
+  shell.start((data) => {
+    viewer.appendShellOutput(data);
+  });
+
   client.onMessage((msg: SignalMessage) => {
     if (msg.type === 'screen' && msg.data?.frame) {
       if (!viewerStarted) {
         viewer.start();
         viewerStarted = true;
-        console.log('Screen viewer started at http://localhost:8080');
-        console.log('Open this URL in your browser to view and control remote screen');
+        console.log('Screen viewer: http://localhost:8080');
         console.log('');
       }
       
@@ -252,8 +244,8 @@ async function runController(proxyUrl?: string): Promise<void> {
   console.log('Commands:');
   console.log('  connect <id>       - Connect to agent');
   console.log('  peers              - List online peers');
-  console.log('  view               - Start viewing remote screen');
-  console.log('  test <message>     - Send test message');
+  console.log('  view               - Start viewing');
+  console.log('  shell              - Toggle shell panel');
   console.log('  quit               - Exit');
   console.log('');
 
@@ -269,7 +261,7 @@ async function runController(proxyUrl?: string): Promise<void> {
           console.log('Usage: connect <agent-id>');
         } else {
           targetPeer = parts[1];
-          console.log(`Target set to: ${targetPeer}`);
+          console.log(`Target: ${targetPeer}`);
         }
         break;
       case 'peers':
@@ -281,16 +273,18 @@ async function runController(proxyUrl?: string): Promise<void> {
         if (!targetPeer) {
           console.log('No target. Use: connect <id>');
         } else {
-          console.log(`Requesting screen from ${targetPeer}...`);
+          console.log(`Requesting screen...`);
           client.send({ type: 'screen-request', to: targetPeer, data: { fps: 20 } });
         }
+        break;
+      case 'shell':
+        console.log('Shell: Use the web UI shell panel');
         break;
       case 'test':
         if (!targetPeer) {
           console.log('No target. Use: connect <id>');
         } else {
           client.sendTest(targetPeer, parts.length > 1 ? parts.slice(1).join(' ') : 'hello');
-          console.log('Test message sent');
         }
         break;
       default:
@@ -298,12 +292,12 @@ async function runController(proxyUrl?: string): Promise<void> {
     }
   }
 
+  shell.stop();
   if (viewerStarted) viewer.stop();
   client.disconnect();
   rl.close();
 }
 
-// Main
 console.log('=== xdesk Remote Desktop Client ===');
 console.log('');
 
@@ -316,7 +310,7 @@ if (mode === 'agent') {
   runController(proxy).catch(console.error);
 } else {
   console.log('Usage:');
-  console.log('  npm run agent       - Start as agent (被控端)');
-  console.log('  npm run controller  - Start as controller (控制端)');
+  console.log('  npm run agent       - Start as agent');
+  console.log('  npm run controller  - Start as controller');
   rl.close();
 }

@@ -1,138 +1,154 @@
-const robot = require('robotjs');
+import { exec } from 'child_process';
+import * as os from 'os';
 
-const KEY_MAP: { [key: string]: string } = {
-  'Enter': 'enter',
-  'Backspace': 'backspace',
-  'Tab': 'tab',
-  'Escape': 'escape',
-  'Delete': 'delete',
-  'Insert': 'insert',
-  'Home': 'home',
-  'End': 'end',
-  'PageUp': 'pageup',
-  'PageDown': 'pagedown',
-  'ArrowUp': 'up',
-  'ArrowDown': 'down',
-  'ArrowLeft': 'left',
-  'ArrowRight': 'right',
-  'Control': 'control',
-  'Shift': 'shift',
-  'Alt': 'alt',
-  'Meta': 'win',
-  'CapsLock': 'capslock',
-  ' ': 'space',
-  'F1': 'f1',
-  'F2': 'f2',
-  'F3': 'f3',
-  'F4': 'f4',
-  'F5': 'f5',
-  'F6': 'f6',
-  'F7': 'f7',
-  'F8': 'f8',
-  'F9': 'f9',
-  'F10': 'f10',
-  'F11': 'f11',
-  'F12': 'f12',
-};
+const isWindows = os.platform() === 'win32';
 
 export class InputController {
   private screenWidth: number;
   private screenHeight: number;
 
   constructor() {
-    const size = robot.getScreenSize();
-    this.screenWidth = size.width;
-    this.screenHeight = size.height;
+    if (isWindows) {
+      this.screenWidth = 1920;
+      this.screenHeight = 1080;
+      try {
+        const result = require('child_process').execSync(
+          'powershell -command "(Get-CimInstance Win32_VideoController).CurrentHorizontalResolution,(Get-CimInstance Win32_VideoController).CurrentVerticalResolution"',
+          { encoding: 'utf8' }
+        ).trim().split('\n');
+        if (result.length >= 2) {
+          this.screenWidth = parseInt(result[0]) || 1920;
+          this.screenHeight = parseInt(result[1]) || 1080;
+        }
+      } catch (e) {}
+    } else {
+      try {
+        const robot = require('robotjs');
+        const size = robot.getScreenSize();
+        this.screenWidth = size.width;
+        this.screenHeight = size.height;
+      } catch (e) {
+        this.screenWidth = 1920;
+        this.screenHeight = 1080;
+      }
+    }
     console.log(`Screen size: ${this.screenWidth}x${this.screenHeight}`);
   }
 
-  private mapKey(key: string): string | null {
-    if (KEY_MAP[key]) {
-      return KEY_MAP[key];
-    }
-    if (key.length === 1) {
-      return key.toLowerCase();
-    }
-    const lower = key.toLowerCase();
-    if (KEY_MAP[lower]) {
-      return KEY_MAP[lower];
-    }
-    return null;
-  }
-
   moveMouse(x: number, y: number): void {
-    try {
-      robot.moveMouse(x, y);
-    } catch (err) {}
+    if (isWindows) {
+      try {
+        exec(`powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(${x}, ${y})"`);
+      } catch (e) {}
+    } else {
+      try {
+        require('robotjs').moveMouse(x, y);
+      } catch (e) {}
+    }
   }
 
-  mouseClick(x: number, y: number, button: 'left' | 'right' | 'middle' = 'left'): void {
-    try {
-      robot.moveMouse(x, y);
-      robot.mouseClick(button);
-    } catch (err) {}
+  mouseClick(x: number, y: number, button: string = 'left'): void {
+    this.moveMouse(x, y);
+    setTimeout(() => {
+      if (isWindows) {
+        const btn = button === 'right' ? 'right' : 'left';
+        try {
+          exec(`powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('{${btn}}')"`);
+        } catch (e) {}
+      } else {
+        try {
+          require('robotjs').mouseClick(button as any);
+        } catch (e) {}
+      }
+    }, 10);
   }
 
-  mouseDown(button: 'left' | 'right' | 'middle' = 'left'): void {
-    try {
-      robot.mouseToggle('down', button);
-    } catch (err) {}
+  scrollMouse(direction: string): void {
+    if (isWindows) {
+      const delta = direction === 'up' ? 120 : -120;
+      try {
+        exec(`powershell -command "Add-Type @'\\nusing System;\\nusing System.Runtime.InteropServices;\\npublic class Mouse {\\n  [DllImport(\"user32.dll\")]\\n  public static extern void mouse_event(uint dwFlags, int dx, int dy, int dwData, IntPtr dwExtraInfo);\\n}\\n'@; [Mouse]::mouse_event(0x0800, 0, 0, ${delta}, [IntPtr]::Zero)"`);
+      } catch (e) {}
+    } else {
+      try {
+        require('robotjs').scrollMouse(0, direction === 'up' ? 3 : -3);
+      } catch (e) {}
+    }
   }
 
-  mouseUp(button: 'left' | 'right' | 'middle' = 'left'): void {
-    try {
-      robot.mouseToggle('up', button);
-    } catch (err) {}
-  }
-
-  mouseDrag(x: number, y: number): void {
-    try {
-      robot.dragMouse(x, y);
-    } catch (err) {}
-  }
-
-  scrollMouse(x: number, y: number, direction: 'up' | 'down'): void {
-    try {
-      robot.scrollMouse(0, direction === 'up' ? 3 : -3);
-    } catch (err) {}
-  }
-
-  keyPress(key: string, modifiers: string[] = []): void {
-    try {
-      const mappedKey = this.mapKey(key);
-      if (!mappedKey) {
-        console.log(`Unknown key: ${key}`);
+  keyPress(key: string): void {
+    if (isWindows) {
+      const keyMap: { [key: string]: string } = {
+        'Enter': '{ENTER}',
+        'Backspace': '{BACKSPACE}',
+        'Tab': '{TAB}',
+        'Escape': '{ESC}',
+        'Delete': '{DELETE}',
+        'ArrowUp': '{UP}',
+        'ArrowDown': '{DOWN}',
+        'ArrowLeft': '{LEFT}',
+        'ArrowRight': '{RIGHT}',
+        'Home': '{HOME}',
+        'End': '{END}',
+        'PageUp': '{PGUP}',
+        'PageDown': '{PGDN}',
+        'Insert': '{INSERT}',
+        'F1': '{F1}',
+        'F2': '{F2}',
+        'F3': '{F3}',
+        'F4': '{F4}',
+        'F5': '{F5}',
+        'F6': '{F6}',
+        'F7': '{F7}',
+        'F8': '{F8}',
+        'F9': '{F9}',
+        'F10': '{F10}',
+        'F11': '{F11}',
+        'F12': '{F12}',
+        ' ': ' ',
+      };
+      
+      let sendKey = keyMap[key] || key;
+      
+      if (key === 'Control' || key === 'Shift' || key === 'Alt' || key === 'Meta') {
         return;
       }
-      const mappedModifiers = modifiers.map(m => this.mapKey(m)).filter(Boolean) as string[];
-      if (mappedModifiers.length > 0) {
-        robot.keyTap(mappedKey, mappedModifiers);
-      } else {
-        robot.keyTap(mappedKey);
-      }
-    } catch (err) {
-      console.log(`Key error: ${key} -> ${this.mapKey(key)}`);
+      
+      sendKey = sendKey.replace(/'/g, "''");
+      
+      try {
+        exec(`powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('${sendKey}')"`);
+      } catch (e) {}
+    } else {
+      try {
+        const robot = require('robotjs');
+        const keyMap: { [key: string]: string } = {
+          'Enter': 'enter',
+          'Backspace': 'backspace',
+          'Tab': 'tab',
+          'Escape': 'escape',
+          'ArrowUp': 'up',
+          'ArrowDown': 'down',
+          'ArrowLeft': 'left',
+          'ArrowRight': 'right',
+          ' ': 'space',
+        };
+        robot.keyTap(keyMap[key] || key.toLowerCase());
+      } catch (e) {}
     }
-  }
-
-  keyDown(key: string): void {
-    try {
-      const mappedKey = this.mapKey(key);
-      if (mappedKey) robot.keyToggle(mappedKey, 'down');
-    } catch (err) {}
-  }
-
-  keyUp(key: string): void {
-    try {
-      const mappedKey = this.mapKey(key);
-      if (mappedKey) robot.keyToggle(mappedKey, 'up');
-    } catch (err) {}
   }
 
   typeText(text: string): void {
-    try {
-      robot.typeString(text);
-    } catch (err) {}
+    if (isWindows) {
+      const escaped = text.replace(/([+^%~(){}[\]])/g, '{$1}');
+      try {
+        exec(`powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('${escaped}')"`);
+      } catch (e) {}
+    } else {
+      try {
+        require('robotjs').typeString(text);
+      } catch (e) {}
+    }
   }
 
   getScreenSize(): { width: number; height: number } {

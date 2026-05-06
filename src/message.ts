@@ -1,5 +1,5 @@
 export interface SignalMessage {
-  type: 'id' | 'offer' | 'answer' | 'ice' | 'test' | 'mouse' | 'key' | 'screen' | 'screen-request' | 'screen-info';
+  type: 'id' | 'offer' | 'answer' | 'ice' | 'test' | 'mouse' | 'key' | 'screen' | 'screen-request' | 'screen-info' | 'shell';
   id?: string;
   to?: string;
   data?: any;
