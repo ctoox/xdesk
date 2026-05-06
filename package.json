@@ -1,0 +1,26 @@
+{
+  "name": "xdesk-client",
+  "version": "1.0.0",
+  "description": "Remote desktop signaling client",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "agent": "ts-node src/index.ts agent",
+    "controller": "ts-node src/index.ts controller"
+  },
+  "dependencies": {
+    "https-proxy-agent": "^9.0.0",
+    "robotjs": "^0.7.0",
+    "screenshot-desktop": "^1.15.4",
+    "sharp": "^0.34.5",
+    "uuid": "^9.0.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.7",
+    "@types/ws": "^8.5.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
