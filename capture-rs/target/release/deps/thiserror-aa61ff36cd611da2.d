@@ -1,0 +1,14 @@
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\deps\thiserror-aa61ff36cd611da2.d: C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\lib.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\aserror.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\display.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\var.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\private.rs C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\build\thiserror-a4307d1970e29ca0\out/private.rs
+
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\deps\libthiserror-aa61ff36cd611da2.rlib: C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\lib.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\aserror.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\display.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\var.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\private.rs C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\build\thiserror-a4307d1970e29ca0\out/private.rs
+
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\deps\libthiserror-aa61ff36cd611da2.rmeta: C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\lib.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\aserror.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\display.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\var.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\private.rs C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\build\thiserror-a4307d1970e29ca0\out/private.rs
+
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\lib.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\aserror.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\display.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\var.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\private.rs:
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\build\thiserror-a4307d1970e29ca0\out/private.rs:
+
+# env-dep:OUT_DIR=C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\thiserror-a4307d1970e29ca0\\out

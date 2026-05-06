@@ -1,9 +1,9 @@
 import * as readline from 'readline';
 import { SignalClient } from './client';
 import { SignalMessage } from './message';
-import { ScreenCapture } from './capture';
 import { ScreenViewer } from './viewer';
 import { executeCommand } from './shell';
+import { RustCapture } from './rust-capture';
 
 const SIGNAL_URL = 'wss://xdesk.ctoocn.workers.dev/ws?room=test';
 
@@ -20,7 +20,7 @@ function prompt(prefix: string): Promise<string> {
 
 async function runAgent(proxyUrl?: string): Promise<void> {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
-  const capture = new ScreenCapture(30, 60, 0.5);
+  const capture = new RustCapture(60, 0.5);
   
   try {
     await client.connect();
@@ -52,14 +52,8 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         targetPeer = msg.id || null;
         if (targetPeer) {
           console.log(`[SCREEN] Request from ${targetPeer}`);
-          capture.setFps(msg.data?.fps || 30);
-          
-          capture.startCapture((frame, isKeyframe) => {
-            const header = Buffer.alloc(5);
-            header.writeUInt8(isKeyframe ? 1 : 0, 0);
-            header.writeUInt32BE(frame.length, 1);
-            client.sendBinary(Buffer.concat([header, frame]));
-            
+          capture.start((frame) => {
+            client.sendBinary(frame);
             frameCount++;
             const now = Date.now();
             if (now - lastFpsTime >= 1000) {
@@ -98,13 +92,9 @@ async function runAgent(proxyUrl?: string): Promise<void> {
     
     if (inputCmd.trim() === 'stream') {
       console.log('Starting stream...');
-      capture.startCapture((frame, isKeyframe) => {
+      capture.start((frame) => {
         if (!targetPeer) return;
-        const header = Buffer.alloc(5);
-        header.writeUInt8(isKeyframe ? 1 : 0, 0);
-        header.writeUInt32BE(frame.length, 1);
-        client.sendBinary(Buffer.concat([header, frame]));
-        
+        client.sendBinary(frame);
         frameCount++;
         const now = Date.now();
         if (now - lastFpsTime >= 1000) {
@@ -115,12 +105,12 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         }
       });
     } else if (inputCmd.trim() === 'stop') {
-      capture.stopCapture();
+      capture.stop();
       console.log('');
     }
   }
 
-  capture.stopCapture();
+  capture.stop();
   client.disconnect();
   rl.close();
 }
@@ -164,12 +154,6 @@ async function runController(proxyUrl?: string): Promise<void> {
   });
 
   client.onFrame((data: Buffer) => {
-    if (data.length < 5) return;
-    
-    const isKeyframe = data.readUInt8(0) === 1;
-    const frameLen = data.readUInt32BE(1);
-    const frame = data.slice(5, 5 + frameLen);
-    
     if (!viewerStarted) {
       viewer.start();
       viewerStarted = true;
@@ -177,7 +161,7 @@ async function runController(proxyUrl?: string): Promise<void> {
       console.log('');
     }
     
-    viewer.updateFrame(frame.toString('base64'));
+    viewer.updateFrame(data.toString('base64'));
     
     frameCount++;
     const now = Date.now();

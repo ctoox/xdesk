@@ -1,0 +1,840 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      The system is: Windows - 10.0.26300 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: -nologo;-MD;-Brepro;-W0
+      Id flags:  
+      
+      The output was:
+      0
+      閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+      鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:11銆?
+      
+      鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\4.0.1\\CompilerIdC\\CompilerIdC.vcxproj鈥?榛樿鐩爣)銆?
+      PrepareForBuild:
+        姝ｅ湪鍒涘缓鐩綍鈥淒ebug\\鈥濄€?
+        宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+        姝ｅ湪鍒涘缓鐩綍鈥淒ebug\\CompilerIdC.tlog\\鈥濄€?
+      InitializeBuildStatus:
+        姝ｅ湪鍒涘缓鈥淒ebug\\CompilerIdC.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+        姝ｅ湪瀵光€淒ebug\\CompilerIdC.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+      VcpkgTripletSelection:
+        Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+        Using normalized configuration "Release"
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\4.0.1\\CompilerIdC\\CompilerIdC.exe
+      AppLocalFromInstalled:
+        pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\4.0.1\\CompilerIdC\\CompilerIdC.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdC.tlog\\CompilerIdC.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+        'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+        鎴栨壒澶勭悊鏂囦欢銆?
+        鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\4.0.1\\CompilerIdC\\CompilerIdC.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdC.tlog\\CompilerIdC.write.1u.tlog" "Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+        "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\4.0.1\\CompilerIdC\\CompilerIdC.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\bin" "Debug\\CompilerIdC.tlog\\CompilerIdC.write.1u.tlog" "Debug\\vcpkg.applocal.log"
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        姝ｅ湪鍒犻櫎鏂囦欢鈥淒ebug\\CompilerIdC.tlog\\unsuccessfulbuild鈥濄€?
+        姝ｅ湪瀵光€淒ebug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+      宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\4.0.1\\CompilerIdC\\CompilerIdC.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+      
+      宸叉垚鍔熺敓鎴愩€?
+          0 涓鍛?
+          0 涓敊璇?
+      
+      宸茬敤鏃堕棿 00:00:02.55
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/4.0.1/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:7 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-9o1fb1"
+      binary: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-9o1fb1"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -nologo -MD -Brepro -W0"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-9o1fb1'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_2313a.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+        鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:14銆?
+        
+        鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-9o1fb1\\cmTC_2313a.vcxproj鈥?榛樿鐩爣)銆?
+        PrepareForBuild:
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_2313a.dir\\Debug\\鈥濄€?
+          宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+          姝ｅ湪鍒涘缓鐩綍鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-9o1fb1\\Debug\\鈥濄€?
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_2313a.dir\\Debug\\cmTC_2313a.tlog\\鈥濄€?
+        InitializeBuildStatus:
+          姝ｅ湪鍒涘缓鈥渃mTC_2313a.dir\\Debug\\cmTC_2313a.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+          姝ｅ湪瀵光€渃mTC_2313a.dir\\Debug\\cmTC_2313a.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /Zi /nologo /W0 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_2313a.dir\\Debug\\\\" /Fd"cmTC_2313a.dir\\Debug\\vc143.pdb" /external:W0 /Gd /TC /errorReport:queue  -Brepro "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-9o1fb1\\Debug\\cmTC_2313a.exe" /INCREMENTAL /ILK:"cmTC_2313a.dir\\Debug\\cmTC_2313a.ilk" /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-9o1fb1/Debug/cmTC_2313a.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-9o1fb1/Debug/cmTC_2313a.lib" /MACHINE:X64  /machine:x64 cmTC_2313a.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_2313a.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-9o1fb1\\Debug\\cmTC_2313a.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-9o1fb1\\Debug\\cmTC_2313a.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_2313a.dir\\Debug\\cmTC_2313a.tlog\\cmTC_2313a.write.1u.tlog" "cmTC_2313a.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+          鎴栨壒澶勭悊鏂囦欢銆?
+          鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-9o1fb1\\Debug\\cmTC_2313a.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_2313a.dir\\Debug\\cmTC_2313a.tlog\\cmTC_2313a.write.1u.tlog" "cmTC_2313a.dir\\Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-9o1fb1\\Debug\\cmTC_2313a.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_2313a.dir\\Debug\\cmTC_2313a.tlog\\cmTC_2313a.write.1u.tlog" "cmTC_2313a.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          姝ｅ湪鍒犻櫎鏂囦欢鈥渃mTC_2313a.dir\\Debug\\cmTC_2313a.tlog\\unsuccessfulbuild鈥濄€?
+          姝ｅ湪瀵光€渃mTC_2313a.dir\\Debug\\cmTC_2313a.tlog\\cmTC_2313a.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+        宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-9o1fb1\\cmTC_2313a.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+        
+        宸叉垚鍔熺敓鎴愩€?
+            0 涓鍛?
+            0 涓敊璇?
+        
+        宸茬敤鏃堕棿 00:00:01.70
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:227 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.43.34808/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CMakeDetermineLinkerId.cmake:36 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerABI.cmake:264 (cmake_determine_linker_id)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      Running the C compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.43.34808/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.43.34809.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:318 (check_include_file)"
+      - "CMakeLists.txt:462 (check_type_size)"
+    checks:
+      - "Looking for sys/types.h"
+    directories:
+      source: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-x7m4ix"
+      binary: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-x7m4ix"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -nologo -MD -Brepro -W0"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    buildResult:
+      variable: "HAVE_SYS_TYPES_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-x7m4ix'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_e1549.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+        鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:17銆?
+        
+        鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x7m4ix\\cmTC_e1549.vcxproj鈥?榛樿鐩爣)銆?
+        PrepareForBuild:
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_e1549.dir\\Debug\\鈥濄€?
+          宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+          姝ｅ湪鍒涘缓鐩綍鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x7m4ix\\Debug\\鈥濄€?
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_e1549.dir\\Debug\\cmTC_e1549.tlog\\鈥濄€?
+        InitializeBuildStatus:
+          姝ｅ湪鍒涘缓鈥渃mTC_e1549.dir\\Debug\\cmTC_e1549.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+          姝ｅ湪瀵光€渃mTC_e1549.dir\\Debug\\cmTC_e1549.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /Zi /nologo /W0 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_e1549.dir\\Debug\\\\" /Fd"cmTC_e1549.dir\\Debug\\vc143.pdb" /external:W0 /Gd /TC /errorReport:queue  -Brepro "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x7m4ix\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x7m4ix\\Debug\\cmTC_e1549.exe" /INCREMENTAL /ILK:"cmTC_e1549.dir\\Debug\\cmTC_e1549.ilk" /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-x7m4ix/Debug/cmTC_e1549.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-x7m4ix/Debug/cmTC_e1549.lib" /MACHINE:X64  /machine:x64 cmTC_e1549.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_e1549.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x7m4ix\\Debug\\cmTC_e1549.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x7m4ix\\Debug\\cmTC_e1549.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_e1549.dir\\Debug\\cmTC_e1549.tlog\\cmTC_e1549.write.1u.tlog" "cmTC_e1549.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+          鎴栨壒澶勭悊鏂囦欢銆?
+          鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x7m4ix\\Debug\\cmTC_e1549.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_e1549.dir\\Debug\\cmTC_e1549.tlog\\cmTC_e1549.write.1u.tlog" "cmTC_e1549.dir\\Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x7m4ix\\Debug\\cmTC_e1549.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_e1549.dir\\Debug\\cmTC_e1549.tlog\\cmTC_e1549.write.1u.tlog" "cmTC_e1549.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          姝ｅ湪鍒犻櫎鏂囦欢鈥渃mTC_e1549.dir\\Debug\\cmTC_e1549.tlog\\unsuccessfulbuild鈥濄€?
+          姝ｅ湪瀵光€渃mTC_e1549.dir\\Debug\\cmTC_e1549.tlog\\cmTC_e1549.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+        宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-x7m4ix\\cmTC_e1549.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+        
+        宸叉垚鍔熺敓鎴愩€?
+            0 涓鍛?
+            0 涓敊璇?
+        
+        宸茬敤鏃堕棿 00:00:01.51
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:319 (check_include_file)"
+      - "CMakeLists.txt:462 (check_type_size)"
+    checks:
+      - "Looking for stdint.h"
+    directories:
+      source: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-g6bdut"
+      binary: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-g6bdut"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -nologo -MD -Brepro -W0"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    buildResult:
+      variable: "HAVE_STDINT_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-g6bdut'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_0f8a6.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+        鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:19銆?
+        
+        鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g6bdut\\cmTC_0f8a6.vcxproj鈥?榛樿鐩爣)銆?
+        PrepareForBuild:
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_0f8a6.dir\\Debug\\鈥濄€?
+          宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+          姝ｅ湪鍒涘缓鐩綍鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g6bdut\\Debug\\鈥濄€?
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_0f8a6.dir\\Debug\\cmTC_0f8a6.tlog\\鈥濄€?
+        InitializeBuildStatus:
+          姝ｅ湪鍒涘缓鈥渃mTC_0f8a6.dir\\Debug\\cmTC_0f8a6.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+          姝ｅ湪瀵光€渃mTC_0f8a6.dir\\Debug\\cmTC_0f8a6.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /Zi /nologo /W0 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_0f8a6.dir\\Debug\\\\" /Fd"cmTC_0f8a6.dir\\Debug\\vc143.pdb" /external:W0 /Gd /TC /errorReport:queue  -Brepro "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g6bdut\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g6bdut\\Debug\\cmTC_0f8a6.exe" /INCREMENTAL /ILK:"cmTC_0f8a6.dir\\Debug\\cmTC_0f8a6.ilk" /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-g6bdut/Debug/cmTC_0f8a6.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-g6bdut/Debug/cmTC_0f8a6.lib" /MACHINE:X64  /machine:x64 cmTC_0f8a6.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_0f8a6.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g6bdut\\Debug\\cmTC_0f8a6.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g6bdut\\Debug\\cmTC_0f8a6.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_0f8a6.dir\\Debug\\cmTC_0f8a6.tlog\\cmTC_0f8a6.write.1u.tlog" "cmTC_0f8a6.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+          鎴栨壒澶勭悊鏂囦欢銆?
+          鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g6bdut\\Debug\\cmTC_0f8a6.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_0f8a6.dir\\Debug\\cmTC_0f8a6.tlog\\cmTC_0f8a6.write.1u.tlog" "cmTC_0f8a6.dir\\Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g6bdut\\Debug\\cmTC_0f8a6.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_0f8a6.dir\\Debug\\cmTC_0f8a6.tlog\\cmTC_0f8a6.write.1u.tlog" "cmTC_0f8a6.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          姝ｅ湪鍒犻櫎鏂囦欢鈥渃mTC_0f8a6.dir\\Debug\\cmTC_0f8a6.tlog\\unsuccessfulbuild鈥濄€?
+          姝ｅ湪瀵光€渃mTC_0f8a6.dir\\Debug\\cmTC_0f8a6.tlog\\cmTC_0f8a6.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+        宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-g6bdut\\cmTC_0f8a6.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+        
+        宸叉垚鍔熺敓鎴愩€?
+            0 涓鍛?
+            0 涓敊璇?
+        
+        宸茬敤鏃堕棿 00:00:01.59
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFile.cmake:99 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:320 (check_include_file)"
+      - "CMakeLists.txt:462 (check_type_size)"
+    checks:
+      - "Looking for stddef.h"
+    directories:
+      source: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-p7ug22"
+      binary: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-p7ug22"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -nologo -MD -Brepro -W0"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    buildResult:
+      variable: "HAVE_STDDEF_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-p7ug22'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_2342e.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+        鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:21銆?
+        
+        鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-p7ug22\\cmTC_2342e.vcxproj鈥?榛樿鐩爣)銆?
+        PrepareForBuild:
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_2342e.dir\\Debug\\鈥濄€?
+          宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+          姝ｅ湪鍒涘缓鐩綍鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-p7ug22\\Debug\\鈥濄€?
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_2342e.dir\\Debug\\cmTC_2342e.tlog\\鈥濄€?
+        InitializeBuildStatus:
+          姝ｅ湪鍒涘缓鈥渃mTC_2342e.dir\\Debug\\cmTC_2342e.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+          姝ｅ湪瀵光€渃mTC_2342e.dir\\Debug\\cmTC_2342e.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /Zi /nologo /W0 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_2342e.dir\\Debug\\\\" /Fd"cmTC_2342e.dir\\Debug\\vc143.pdb" /external:W0 /Gd /TC /errorReport:queue  -Brepro "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-p7ug22\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-p7ug22\\Debug\\cmTC_2342e.exe" /INCREMENTAL /ILK:"cmTC_2342e.dir\\Debug\\cmTC_2342e.ilk" /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-p7ug22/Debug/cmTC_2342e.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-p7ug22/Debug/cmTC_2342e.lib" /MACHINE:X64  /machine:x64 cmTC_2342e.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_2342e.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-p7ug22\\Debug\\cmTC_2342e.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-p7ug22\\Debug\\cmTC_2342e.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_2342e.dir\\Debug\\cmTC_2342e.tlog\\cmTC_2342e.write.1u.tlog" "cmTC_2342e.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+          鎴栨壒澶勭悊鏂囦欢銆?
+          鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-p7ug22\\Debug\\cmTC_2342e.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_2342e.dir\\Debug\\cmTC_2342e.tlog\\cmTC_2342e.write.1u.tlog" "cmTC_2342e.dir\\Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-p7ug22\\Debug\\cmTC_2342e.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_2342e.dir\\Debug\\cmTC_2342e.tlog\\cmTC_2342e.write.1u.tlog" "cmTC_2342e.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          姝ｅ湪鍒犻櫎鏂囦欢鈥渃mTC_2342e.dir\\Debug\\cmTC_2342e.tlog\\unsuccessfulbuild鈥濄€?
+          姝ｅ湪瀵光€渃mTC_2342e.dir\\Debug\\cmTC_2342e.tlog\\cmTC_2342e.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+        宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-p7ug22\\cmTC_2342e.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+        
+        宸叉垚鍔熺敓鎴愩€?
+            0 涓鍛?
+            0 涓敊璇?
+        
+        宸茬敤鏃堕棿 00:00:02.42
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:212 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:339 (__check_type_size_impl)"
+      - "CMakeLists.txt:462 (check_type_size)"
+    checks:
+      - "Check size of size_t"
+    directories:
+      source: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-cqnqnq"
+      binary: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-cqnqnq"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -nologo -MD -Brepro -W0"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    buildResult:
+      variable: "HAVE_SIZE_T"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-cqnqnq'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_ebd75.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+        鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:24銆?
+        
+        鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cqnqnq\\cmTC_ebd75.vcxproj鈥?榛樿鐩爣)銆?
+        PrepareForBuild:
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_ebd75.dir\\Debug\\鈥濄€?
+          宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+          姝ｅ湪鍒涘缓鐩綍鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cqnqnq\\Debug\\鈥濄€?
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_ebd75.dir\\Debug\\cmTC_ebd75.tlog\\鈥濄€?
+        InitializeBuildStatus:
+          姝ｅ湪鍒涘缓鈥渃mTC_ebd75.dir\\Debug\\cmTC_ebd75.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+          姝ｅ湪瀵光€渃mTC_ebd75.dir\\Debug\\cmTC_ebd75.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /Zi /nologo /W0 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_ebd75.dir\\Debug\\\\" /Fd"cmTC_ebd75.dir\\Debug\\vc143.pdb" /external:W0 /Gd /TC /errorReport:queue  -Brepro "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cqnqnq\\SIZE_T.c"
+          SIZE_T.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cqnqnq\\Debug\\cmTC_ebd75.exe" /INCREMENTAL /ILK:"cmTC_ebd75.dir\\Debug\\cmTC_ebd75.ilk" /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-cqnqnq/Debug/cmTC_ebd75.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-cqnqnq/Debug/cmTC_ebd75.lib" /MACHINE:X64  /machine:x64 cmTC_ebd75.dir\\Debug\\SIZE_T.obj
+          cmTC_ebd75.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cqnqnq\\Debug\\cmTC_ebd75.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cqnqnq\\Debug\\cmTC_ebd75.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_ebd75.dir\\Debug\\cmTC_ebd75.tlog\\cmTC_ebd75.write.1u.tlog" "cmTC_ebd75.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+          鎴栨壒澶勭悊鏂囦欢銆?
+          鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cqnqnq\\Debug\\cmTC_ebd75.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_ebd75.dir\\Debug\\cmTC_ebd75.tlog\\cmTC_ebd75.write.1u.tlog" "cmTC_ebd75.dir\\Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cqnqnq\\Debug\\cmTC_ebd75.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_ebd75.dir\\Debug\\cmTC_ebd75.tlog\\cmTC_ebd75.write.1u.tlog" "cmTC_ebd75.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          姝ｅ湪鍒犻櫎鏂囦欢鈥渃mTC_ebd75.dir\\Debug\\cmTC_ebd75.tlog\\unsuccessfulbuild鈥濄€?
+          姝ｅ湪瀵光€渃mTC_ebd75.dir\\Debug\\cmTC_ebd75.tlog\\cmTC_ebd75.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+        宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cqnqnq\\cmTC_ebd75.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+        
+        宸叉垚鍔熺敓鎴愩€?
+            0 涓鍛?
+            0 涓敊璇?
+        
+        宸茬敤鏃堕棿 00:00:01.22
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:212 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckTypeSize.cmake:339 (__check_type_size_impl)"
+      - "CMakeLists.txt:463 (check_type_size)"
+    checks:
+      - "Check size of unsigned long"
+    directories:
+      source: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-5g36ko"
+      binary: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-5g36ko"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -nologo -MD -Brepro -W0"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    buildResult:
+      variable: "HAVE_UNSIGNED_LONG"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-5g36ko'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_505b9.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+        鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:25銆?
+        
+        鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-5g36ko\\cmTC_505b9.vcxproj鈥?榛樿鐩爣)銆?
+        PrepareForBuild:
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_505b9.dir\\Debug\\鈥濄€?
+          宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+          姝ｅ湪鍒涘缓鐩綍鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-5g36ko\\Debug\\鈥濄€?
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_505b9.dir\\Debug\\cmTC_505b9.tlog\\鈥濄€?
+        InitializeBuildStatus:
+          姝ｅ湪鍒涘缓鈥渃mTC_505b9.dir\\Debug\\cmTC_505b9.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+          姝ｅ湪瀵光€渃mTC_505b9.dir\\Debug\\cmTC_505b9.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /Zi /nologo /W0 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_505b9.dir\\Debug\\\\" /Fd"cmTC_505b9.dir\\Debug\\vc143.pdb" /external:W0 /Gd /TC /errorReport:queue  -Brepro "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-5g36ko\\UNSIGNED_LONG.c"
+          UNSIGNED_LONG.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-5g36ko\\Debug\\cmTC_505b9.exe" /INCREMENTAL /ILK:"cmTC_505b9.dir\\Debug\\cmTC_505b9.ilk" /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-5g36ko/Debug/cmTC_505b9.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-5g36ko/Debug/cmTC_505b9.lib" /MACHINE:X64  /machine:x64 cmTC_505b9.dir\\Debug\\UNSIGNED_LONG.obj
+          cmTC_505b9.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-5g36ko\\Debug\\cmTC_505b9.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-5g36ko\\Debug\\cmTC_505b9.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_505b9.dir\\Debug\\cmTC_505b9.tlog\\cmTC_505b9.write.1u.tlog" "cmTC_505b9.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+          鎴栨壒澶勭悊鏂囦欢銆?
+          鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-5g36ko\\Debug\\cmTC_505b9.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_505b9.dir\\Debug\\cmTC_505b9.tlog\\cmTC_505b9.write.1u.tlog" "cmTC_505b9.dir\\Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-5g36ko\\Debug\\cmTC_505b9.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_505b9.dir\\Debug\\cmTC_505b9.tlog\\cmTC_505b9.write.1u.tlog" "cmTC_505b9.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          姝ｅ湪鍒犻櫎鏂囦欢鈥渃mTC_505b9.dir\\Debug\\cmTC_505b9.tlog\\unsuccessfulbuild鈥濄€?
+          姝ｅ湪瀵光€渃mTC_505b9.dir\\Debug\\cmTC_505b9.tlog\\cmTC_505b9.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+        宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-5g36ko\\cmTC_505b9.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+        
+        宸叉垚鍔熺敓鎴愩€?
+            0 涓鍛?
+            0 涓敊璇?
+        
+        宸茬敤鏃堕棿 00:00:01.24
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckIncludeFiles.cmake:141 (try_compile)"
+      - "CMakeLists.txt:470 (check_include_files)"
+    checks:
+      - "Looking for include file intrin.h"
+    directories:
+      source: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-4qgez1"
+      binary: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-4qgez1"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -nologo -MD -Brepro -W0"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    buildResult:
+      variable: "HAVE_INTRIN_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-4qgez1'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_a7fd8.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+        鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:27銆?
+        
+        鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4qgez1\\cmTC_a7fd8.vcxproj鈥?榛樿鐩爣)銆?
+        PrepareForBuild:
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_a7fd8.dir\\Debug\\鈥濄€?
+          宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+          姝ｅ湪鍒涘缓鐩綍鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4qgez1\\Debug\\鈥濄€?
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_a7fd8.dir\\Debug\\cmTC_a7fd8.tlog\\鈥濄€?
+        InitializeBuildStatus:
+          姝ｅ湪鍒涘缓鈥渃mTC_a7fd8.dir\\Debug\\cmTC_a7fd8.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+          姝ｅ湪瀵光€渃mTC_a7fd8.dir\\Debug\\cmTC_a7fd8.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /Zi /nologo /W0 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a7fd8.dir\\Debug\\\\" /Fd"cmTC_a7fd8.dir\\Debug\\vc143.pdb" /external:W0 /Gd /TC /errorReport:queue  -Brepro "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4qgez1\\HAVE_INTRIN_H.c"
+          HAVE_INTRIN_H.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4qgez1\\Debug\\cmTC_a7fd8.exe" /INCREMENTAL /ILK:"cmTC_a7fd8.dir\\Debug\\cmTC_a7fd8.ilk" /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-4qgez1/Debug/cmTC_a7fd8.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-4qgez1/Debug/cmTC_a7fd8.lib" /MACHINE:X64  /machine:x64 cmTC_a7fd8.dir\\Debug\\HAVE_INTRIN_H.obj
+          cmTC_a7fd8.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4qgez1\\Debug\\cmTC_a7fd8.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4qgez1\\Debug\\cmTC_a7fd8.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_a7fd8.dir\\Debug\\cmTC_a7fd8.tlog\\cmTC_a7fd8.write.1u.tlog" "cmTC_a7fd8.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+          鎴栨壒澶勭悊鏂囦欢銆?
+          鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4qgez1\\Debug\\cmTC_a7fd8.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_a7fd8.dir\\Debug\\cmTC_a7fd8.tlog\\cmTC_a7fd8.write.1u.tlog" "cmTC_a7fd8.dir\\Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4qgez1\\Debug\\cmTC_a7fd8.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_a7fd8.dir\\Debug\\cmTC_a7fd8.tlog\\cmTC_a7fd8.write.1u.tlog" "cmTC_a7fd8.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          姝ｅ湪鍒犻櫎鏂囦欢鈥渃mTC_a7fd8.dir\\Debug\\cmTC_a7fd8.tlog\\unsuccessfulbuild鈥濄€?
+          姝ｅ湪瀵光€渃mTC_a7fd8.dir\\Debug\\cmTC_a7fd8.tlog\\cmTC_a7fd8.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+        宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4qgez1\\cmTC_a7fd8.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+        
+        宸叉垚鍔熺敓鎴愩€?
+            0 涓鍛?
+            0 涓敊璇?
+        
+        宸茬敤鏃堕棿 00:00:02.13
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckSourceCompiles.cmake:104 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckCSourceCompiles.cmake:58 (cmake_check_source_compiles)"
+      - "CMakeLists.txt:525 (check_c_source_compiles)"
+    checks:
+      - "Performing Test INLINE_WORKS"
+    directories:
+      source: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-m0xhfv"
+      binary: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-m0xhfv"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -nologo -MD -Brepro -W0"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    buildResult:
+      variable: "INLINE_WORKS"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-m0xhfv'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_5ed5b.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+        鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:30銆?
+        
+        鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-m0xhfv\\cmTC_5ed5b.vcxproj鈥?榛樿鐩爣)銆?
+        PrepareForBuild:
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_5ed5b.dir\\Debug\\鈥濄€?
+          宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+          姝ｅ湪鍒涘缓鐩綍鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-m0xhfv\\Debug\\鈥濄€?
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_5ed5b.dir\\Debug\\cmTC_5ed5b.tlog\\鈥濄€?
+        InitializeBuildStatus:
+          姝ｅ湪鍒涘缓鈥渃mTC_5ed5b.dir\\Debug\\cmTC_5ed5b.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+          姝ｅ湪瀵光€渃mTC_5ed5b.dir\\Debug\\cmTC_5ed5b.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /Zi /nologo /W0 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D INLINE_WORKS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_5ed5b.dir\\Debug\\\\" /Fd"cmTC_5ed5b.dir\\Debug\\vc143.pdb" /external:W0 /Gd /TC /errorReport:queue  -Brepro "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-m0xhfv\\src.c"
+          src.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-m0xhfv\\Debug\\cmTC_5ed5b.exe" /INCREMENTAL /ILK:"cmTC_5ed5b.dir\\Debug\\cmTC_5ed5b.ilk" /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-m0xhfv/Debug/cmTC_5ed5b.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-m0xhfv/Debug/cmTC_5ed5b.lib" /MACHINE:X64  /machine:x64 cmTC_5ed5b.dir\\Debug\\src.obj
+          cmTC_5ed5b.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-m0xhfv\\Debug\\cmTC_5ed5b.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-m0xhfv\\Debug\\cmTC_5ed5b.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_5ed5b.dir\\Debug\\cmTC_5ed5b.tlog\\cmTC_5ed5b.write.1u.tlog" "cmTC_5ed5b.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+          鎴栨壒澶勭悊鏂囦欢銆?
+          鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-m0xhfv\\Debug\\cmTC_5ed5b.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_5ed5b.dir\\Debug\\cmTC_5ed5b.tlog\\cmTC_5ed5b.write.1u.tlog" "cmTC_5ed5b.dir\\Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-m0xhfv\\Debug\\cmTC_5ed5b.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_5ed5b.dir\\Debug\\cmTC_5ed5b.tlog\\cmTC_5ed5b.write.1u.tlog" "cmTC_5ed5b.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          姝ｅ湪鍒犻櫎鏂囦欢鈥渃mTC_5ed5b.dir\\Debug\\cmTC_5ed5b.tlog\\unsuccessfulbuild鈥濄€?
+          姝ｅ湪瀵光€渃mTC_5ed5b.dir\\Debug\\cmTC_5ed5b.tlog\\cmTC_5ed5b.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+        宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-m0xhfv\\cmTC_5ed5b.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+        
+        宸叉垚鍔熺敓鎴愩€?
+            0 涓鍛?
+            0 涓敊璇?
+        
+        宸茬敤鏃堕棿 00:00:01.18
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckSourceCompiles.cmake:104 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CheckCSourceCompiles.cmake:58 (cmake_check_source_compiles)"
+      - "CMakeLists.txt:542 (check_c_source_compiles)"
+    checks:
+      - "Performing Test HAVE_THREAD_LOCAL"
+    directories:
+      source: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-uo7uax"
+      binary: "C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-uo7uax"
+    cmakeVariables:
+      CMAKE_C_FLAGS: " -nologo -MD -Brepro -W0"
+      CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    buildResult:
+      variable: "HAVE_THREAD_LOCAL"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-uo7uax'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_262a6.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        閫傜敤浜?.NET Framework MSBuild 鐗堟湰 17.13.19+0d9f5a35a
+        鐢熸垚鍚姩鏃堕棿涓?2026/5/7 5:47:31銆?
+        
+        鑺傜偣 1 涓婄殑椤圭洰鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-uo7uax\\cmTC_262a6.vcxproj鈥?榛樿鐩爣)銆?
+        PrepareForBuild:
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_262a6.dir\\Debug\\鈥濄€?
+          宸插惎鐢ㄧ粨鏋勫寲杈撳嚭銆傜紪璇戝櫒璇婃柇鐨勬牸寮忚缃皢鍙嶆槧閿欒灞傛缁撴瀯銆傛湁鍏宠缁嗕俊鎭紝璇峰弬闃?https://aka.ms/cpp/structured-output銆?
+          姝ｅ湪鍒涘缓鐩綍鈥淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-uo7uax\\Debug\\鈥濄€?
+          姝ｅ湪鍒涘缓鐩綍鈥渃mTC_262a6.dir\\Debug\\cmTC_262a6.tlog\\鈥濄€?
+        InitializeBuildStatus:
+          姝ｅ湪鍒涘缓鈥渃mTC_262a6.dir\\Debug\\cmTC_262a6.tlog\\unsuccessfulbuild鈥濓紝鍥犱负宸叉寚瀹氣€淎lwaysCreate鈥濄€?
+          姝ｅ湪瀵光€渃mTC_262a6.dir\\Debug\\cmTC_262a6.tlog\\unsuccessfulbuild鈥濇墽琛?Touch 浠诲姟銆?
+        VcpkgTripletSelection:
+          Using triplet "x64-windows" from "C:\\dev\\vcpkg\\installed\\x64-windows\\"
+          Using normalized configuration "Debug"
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /I"C:\\dev\\vcpkg\\installed\\x64-windows\\include" /Zi /nologo /W0 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D HAVE_THREAD_LOCAL /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_262a6.dir\\Debug\\\\" /Fd"cmTC_262a6.dir\\Debug\\vc143.pdb" /external:W0 /Gd /TC /errorReport:queue  -Brepro "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-uo7uax\\src.c"
+          src.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-uo7uax\\Debug\\cmTC_262a6.exe" /INCREMENTAL /ILK:"cmTC_262a6.dir\\Debug\\cmTC_262a6.ilk" /NOLOGO /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib" /LIBPATH:"C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\manual-link" kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\lib\\*.lib" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-uo7uax/Debug/cmTC_262a6.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/ctooc/Desktop/local/xdesk-ts/capture-rs/target/release/build/turbojpeg-sys-43c32367d05a60d7/out/build/CMakeFiles/CMakeScratch/TryCompile-uo7uax/Debug/cmTC_262a6.lib" /MACHINE:X64  /machine:x64 cmTC_262a6.dir\\Debug\\src.obj
+          cmTC_262a6.vcxproj -> C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-uo7uax\\Debug\\cmTC_262a6.exe
+        AppLocalFromInstalled:
+          pwsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-uo7uax\\Debug\\cmTC_262a6.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_262a6.dir\\Debug\\cmTC_262a6.tlog\\cmTC_262a6.write.1u.tlog" "cmTC_262a6.dir\\Debug\\vcpkg.applocal.log"
+          'pwsh.exe' 涓嶆槸鍐呴儴鎴栧閮ㄥ懡浠わ紝涔熶笉鏄彲杩愯鐨勭▼搴?
+          鎴栨壒澶勭悊鏂囦欢銆?
+          鍛戒护鈥減wsh.exe -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-uo7uax\\Debug\\cmTC_262a6.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_262a6.dir\\Debug\\cmTC_262a6.tlog\\cmTC_262a6.write.1u.tlog" "cmTC_262a6.dir\\Debug\\vcpkg.applocal.log"鈥濆凡閫€鍑猴紝浠ｇ爜涓?9009銆?
+          "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ExecutionPolicy Bypass -noprofile -File "C:\\dev\\vcpkg\\scripts\\buildsystems\\msbuild\\applocal.ps1" "C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-uo7uax\\Debug\\cmTC_262a6.exe" "C:\\dev\\vcpkg\\installed\\x64-windows\\debug\\bin" "cmTC_262a6.dir\\Debug\\cmTC_262a6.tlog\\cmTC_262a6.write.1u.tlog" "cmTC_262a6.dir\\Debug\\vcpkg.applocal.log"
+        FinalizeBuildStatus:
+          姝ｅ湪鍒犻櫎鏂囦欢鈥渃mTC_262a6.dir\\Debug\\cmTC_262a6.tlog\\unsuccessfulbuild鈥濄€?
+          姝ｅ湪瀵光€渃mTC_262a6.dir\\Debug\\cmTC_262a6.tlog\\cmTC_262a6.lastbuildstate鈥濇墽琛?Touch 浠诲姟銆?
+        宸插畬鎴愮敓鎴愰」鐩€淐:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\turbojpeg-sys-43c32367d05a60d7\\out\\build\\CMakeFiles\\CMakeScratch\\TryCompile-uo7uax\\cmTC_262a6.vcxproj鈥?榛樿鐩爣)鐨勬搷浣溿€?
+        
+        宸叉垚鍔熺敓鎴愩€?
+            0 涓鍛?
+            0 涓敊璇?
+        
+        宸茬敤鏃堕棿 00:00:01.14
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is GNU using "--version" did not match "(GNU assembler)|(GCC)|(Free Software Foundation)":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is AppleClang using "--version" did not match "(Apple (clang|LLVM) version)":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is Clang using "--version" did not match "(clang version)":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is ARMClang using "--version" did not match "armclang":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is OrangeC using "--version" did not match "occ \\(OrangeC\\) Version":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is HP using "-V" did not match "HP C":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is Intel using "--version" did not match "(ICC)":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is IntelLLVM using "--version" did not match "(Intel[^
+      ]+oneAPI)":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is SunPro using "-V" did not match "Sun C":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is XL using "-qversion" did not match "XL C":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is MSVC using "-?" did not match "Microsoft":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is TI using "-h" did not match "Texas Instruments":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is TIClang using "--version" did not match "(TI (.*) Clang Compiler)":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is IAR using "" did not match "IAR Assembler":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is ARMCC using "" did not match "(ARM Compiler)|(ARM Assembler)|(Arm Compiler)":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is NASM using "-v" did not match "(NASM version)":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is YASM using "--version" did not match "(yasm)":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is ADSP using "-version" did not match "Analog Devices":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is QCC using "-V" did not match "gcc_nto":
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineCompilerId.cmake:1243 (message)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASMCompiler.cmake:139 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeDetermineASM_NASMCompiler.cmake:29 (include)"
+      - "simd/CMakeLists.txt:52 (enable_language)"
+    message: |
+      Checking whether the ASM_NASM compiler is Tasking using "--version" did not match "TASKING":
+...

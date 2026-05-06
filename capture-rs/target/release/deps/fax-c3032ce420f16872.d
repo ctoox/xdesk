@@ -1,0 +1,12 @@
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\deps\fax-c3032ce420f16872.d: C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\lib.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\maps.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\decoder.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\encoder.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\tiff.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\bitmaps.rs
+
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\deps\libfax-c3032ce420f16872.rlib: C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\lib.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\maps.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\decoder.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\encoder.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\tiff.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\bitmaps.rs
+
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\deps\libfax-c3032ce420f16872.rmeta: C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\lib.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\maps.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\decoder.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\encoder.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\tiff.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\bitmaps.rs
+
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\lib.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\maps.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\decoder.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\encoder.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\tiff.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\fax-0.2.7\src\bitmaps.rs:

@@ -1,0 +1,14 @@
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\deps\serde-1248609ab1b66656.d: C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\build\serde-080949b6170771c9\out/private.rs
+
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\deps\libserde-1248609ab1b66656.rlib: C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\build\serde-080949b6170771c9\out/private.rs
+
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\deps\libserde-1248609ab1b66656.rmeta: C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\build\serde-080949b6170771c9\out/private.rs
+
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs:
+C:\Users\ctooc\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs:
+C:\Users\ctooc\Desktop\local\xdesk-ts\capture-rs\target\release\build\serde-080949b6170771c9\out/private.rs:
+
+# env-dep:OUT_DIR=C:\\Users\\ctooc\\Desktop\\local\\xdesk-ts\\capture-rs\\target\\release\\build\\serde-080949b6170771c9\\out
