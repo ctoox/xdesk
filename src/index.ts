@@ -53,7 +53,12 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         if (targetPeer) {
           console.log(`[SCREEN] Request from ${targetPeer}`);
           capture.start((frame) => {
-            client.sendBinary(frame);
+            // Send as base64 JSON
+            client.send({
+              type: 'screen',
+              to: targetPeer,
+              data: { frame: frame.toString('base64') }
+            });
             frameCount++;
             const now = Date.now();
             if (now - lastFpsTime >= 1000) {
@@ -94,7 +99,11 @@ async function runAgent(proxyUrl?: string): Promise<void> {
       console.log('Starting stream...');
       capture.start((frame) => {
         if (!targetPeer) return;
-        client.sendBinary(frame);
+        client.send({
+          type: 'screen',
+          to: targetPeer,
+          data: { frame: frame.toString('base64') }
+        });
         frameCount++;
         const now = Date.now();
         if (now - lastFpsTime >= 1000) {
@@ -153,24 +162,28 @@ async function runController(proxyUrl?: string): Promise<void> {
     client.send({ type: 'shell', to: targetPeer, data: { command } });
   });
 
-  client.onFrame((data: Buffer) => {
-    if (!viewerStarted) {
-      viewer.start();
-      viewerStarted = true;
-      console.log('Screen viewer: http://localhost:8080');
-      console.log('');
+  client.onMessage((msg: SignalMessage) => {
+    if (msg.type === 'screen' && msg.data?.frame) {
+      if (!viewerStarted) {
+        viewer.start();
+        viewerStarted = true;
+        console.log('Screen viewer: http://localhost:8080');
+        console.log('');
+      }
+      
+      viewer.updateFrame(msg.data.frame);
+      
+      frameCount++;
+      const now = Date.now();
+      if (now - lastFpsTime >= 1000) {
+        currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+        frameCount = 0;
+        lastFpsTime = now;
+        process.stdout.write(`\r[FPS: ${currentFps}] `);
+      }
     }
-    
-    // Direct JPEG frame, no header
-    viewer.updateFrame(data.toString('base64'));
-    
-    frameCount++;
-    const now = Date.now();
-    if (now - lastFpsTime >= 1000) {
-      currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
-      frameCount = 0;
-      lastFpsTime = now;
-      process.stdout.write(`\r[FPS: ${currentFps}] `);
+    if (msg.type === 'shell-output' && msg.data?.output) {
+      viewer.appendShellOutput(msg.data.output);
     }
   });
 
