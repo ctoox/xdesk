@@ -196,8 +196,17 @@ async function runController(proxyUrl?: string): Promise<void> {
         else { targetPeer = parts[1]; console.log(`Target: ${targetPeer}`); }
         break;
       case 'view':
-        if (!targetPeer) console.log('No target. Use: connect <id>');
-        else { console.log('Requesting screen...'); client.send({ type: 'screen-request', to: targetPeer, data: { fps: 30 } }); }
+        if (!targetPeer) {
+          console.log('No target. Use: connect <id>');
+        } else {
+          if (!viewerStarted) {
+            viewer.start();
+            viewerStarted = true;
+            console.log('Screen viewer: http://localhost:8080');
+          }
+          console.log('Requesting screen...');
+          client.send({ type: 'screen-request', to: targetPeer, data: { fps: 30 } });
+        }
         break;
     }
   }
