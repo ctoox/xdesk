@@ -4,6 +4,7 @@ import { SignalMessage } from './message';
 import { ScreenViewer } from './viewer';
 import { executeCommand } from './shell';
 import { RustCapture } from './rust-capture';
+import { WebRTCPeer } from './webrtc';
 
 const SIGNAL_URL = 'wss://xdesk.ctoocn.workers.dev/ws?room=test';
 
@@ -20,7 +21,8 @@ function prompt(prefix: string): Promise<string> {
 
 async function runAgent(proxyUrl?: string): Promise<void> {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
-  const capture = new RustCapture(50, 1920);
+  const capture = new RustCapture(80);
+  const webrtc = new WebRTCPeer(client);
   
   try {
     await client.connect();
@@ -52,13 +54,24 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         targetPeer = msg.id || null;
         if (targetPeer) {
           console.log(`[SCREEN] Request from ${targetPeer}`);
+          
+          // Try WebRTC first
+          webrtc.connect(targetPeer).catch(e => {
+            console.log('[WebRTC] Failed, falling back to WebSocket');
+          });
+          
           capture.start((frame) => {
-            // Send as JSON base64
-            client.send({
-              type: 'screen',
-              to: targetPeer,
-              data: { frame: frame.toString('base64') }
-            });
+            if (webrtc.isConnected()) {
+              // Send via WebRTC P2P
+              webrtc.sendFrame(frame);
+            } else {
+              // Fallback to WebSocket
+              client.send({
+                type: 'screen',
+                to: targetPeer,
+                data: { frame: frame.toString('base64') }
+              });
+            }
             frameCount++;
             const now = Date.now();
             if (now - lastFpsTime >= 1000) {
@@ -68,6 +81,24 @@ async function runAgent(proxyUrl?: string): Promise<void> {
               process.stdout.write(`\r[FPS: ${currentFps}] `);
             }
           });
+        }
+        break;
+        
+      case 'offer':
+        if (msg.id && msg.data?.sdp) {
+          webrtc.handleOffer(msg.data.sdp, msg.id);
+        }
+        break;
+        
+      case 'answer':
+        if (msg.data?.sdp) {
+          webrtc.handleAnswer(msg.data.sdp);
+        }
+        break;
+        
+      case 'ice':
+        if (msg.data?.candidate) {
+          webrtc.handleIceCandidate(msg.data.candidate);
         }
         break;
         
@@ -99,11 +130,15 @@ async function runAgent(proxyUrl?: string): Promise<void> {
       console.log('Starting stream...');
       capture.start((frame) => {
         if (!targetPeer) return;
-        client.send({
-          type: 'screen',
-          to: targetPeer,
-          data: { frame: frame.toString('base64') }
-        });
+        if (webrtc.isConnected()) {
+          webrtc.sendFrame(frame);
+        } else {
+          client.send({
+            type: 'screen',
+            to: targetPeer,
+            data: { frame: frame.toString('base64') }
+          });
+        }
         frameCount++;
         const now = Date.now();
         if (now - lastFpsTime >= 1000) {
@@ -115,11 +150,13 @@ async function runAgent(proxyUrl?: string): Promise<void> {
       });
     } else if (inputCmd.trim() === 'stop') {
       capture.stop();
+      webrtc.close();
       console.log('');
     }
   }
 
   capture.stop();
+  webrtc.close();
   client.disconnect();
   rl.close();
 }
@@ -127,6 +164,7 @@ async function runAgent(proxyUrl?: string): Promise<void> {
 async function runController(proxyUrl?: string): Promise<void> {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
   const viewer = new ScreenViewer(8080);
+  const webrtc = new WebRTCPeer(client);
   let viewerStarted = false;
   
   try {
@@ -162,9 +200,27 @@ async function runController(proxyUrl?: string): Promise<void> {
     client.send({ type: 'shell', to: targetPeer, data: { command } });
   });
 
-  // Handle screen frames
+  // Handle WebRTC frames
+  webrtc.onFrame((frame) => {
+    if (!viewerStarted) {
+      viewer.start();
+      viewerStarted = true;
+      console.log('Screen viewer: http://localhost:8080');
+    }
+    viewer.updateFrame(frame.toString('base64'));
+    frameCount++;
+    const now = Date.now();
+    if (now - lastFpsTime >= 1000) {
+      currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+      frameCount = 0;
+      lastFpsTime = now;
+      process.stdout.write(`\r[FPS: ${currentFps}] `);
+    }
+  });
+
   client.onMessage((msg: SignalMessage) => {
     if (msg.type === 'screen' && msg.data?.frame) {
+      // WebSocket fallback
       if (!viewerStarted) {
         viewer.start();
         viewerStarted = true;
@@ -182,6 +238,15 @@ async function runController(proxyUrl?: string): Promise<void> {
     }
     if (msg.type === 'shell-output' && msg.data?.output) {
       viewer.appendShellOutput(msg.data.output);
+    }
+    if (msg.type === 'offer' && msg.id && msg.data?.sdp) {
+      webrtc.handleOffer(msg.data.sdp, msg.id);
+    }
+    if (msg.type === 'answer' && msg.data?.sdp) {
+      webrtc.handleAnswer(msg.data.sdp);
+    }
+    if (msg.type === 'ice' && msg.data?.candidate) {
+      webrtc.handleIceCandidate(msg.data.candidate);
     }
   });
 
@@ -218,6 +283,7 @@ async function runController(proxyUrl?: string): Promise<void> {
   }
 
   if (viewerStarted) viewer.stop();
+  webrtc.close();
   client.disconnect();
   rl.close();
 }
