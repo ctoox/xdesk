@@ -50,26 +50,22 @@ export class ScreenViewer {
           'Connection': 'keep-alive',
           'Access-Control-Allow-Origin': '*'
         });
-        
         this.clients.add(res);
-        
         if (this.currentFrame) {
           res.write(`data: ${this.currentFrame}\n\n`);
         }
-        
-        req.on('close', () => {
-          this.clients.delete(res);
-        });
+        req.on('close', () => { this.clients.delete(res); });
       } else if (req.url === '/input' && req.method === 'POST') {
         let body = '';
         req.on('data', (chunk) => body += chunk);
         req.on('end', () => {
           try {
             const input = JSON.parse(body);
+            console.log('[INPUT]', input.type, input.action, input.key || '');
             if (this.onInput) {
               this.onInput(input.type, input);
             }
-          } catch (e) {}
+          } catch (e) { console.error('[INPUT ERROR]', e); }
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end('{"ok":true}');
         });
@@ -87,16 +83,10 @@ export class ScreenViewer {
           res.end('{"ok":true}');
         });
       } else if (req.url === '/shell-output') {
-        res.writeHead(200, {
-          'Content-Type': 'text/plain',
-          'Access-Control-Allow-Origin': '*'
-        });
+        res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
         res.end(this.shellOutput);
       } else if (req.url === '/stats') {
-        res.writeHead(200, {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        });
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
         res.end(JSON.stringify(this.getStats()));
       } else {
         res.writeHead(404);
@@ -122,7 +112,6 @@ export class ScreenViewer {
   updateFrame(frame: string): void {
     this.currentFrame = frame;
     this.frameCount++;
-    
     for (const client of this.clients) {
       try {
         client.write(`data: ${frame}\n\n`);
@@ -132,24 +121,14 @@ export class ScreenViewer {
     }
   }
 
-  getCurrentFps(): number {
-    return this.currentFps;
-  }
+  getCurrentFps(): number { return this.currentFps; }
 
   getStats(): any {
-    const elapsed = (Date.now() - this.startTime) / 1000;
-    return {
-      clients: this.clients.size,
-      fps: this.currentFps,
-      uptime: Math.round(elapsed)
-    };
+    return { clients: this.clients.size, fps: this.currentFps, uptime: Math.round((Date.now() - this.startTime) / 1000) };
   }
 
   stop(): void {
-    if (this.server) {
-      this.server.close();
-      this.server = null;
-    }
+    if (this.server) { this.server.close(); this.server = null; }
   }
 
   private getHtml(): string {
@@ -159,23 +138,8 @@ export class ScreenViewer {
   <title>xdesk - Remote Screen</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      background: #1a1a1a; 
-      display: flex; 
-      flex-direction: column;
-      height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      overflow: hidden;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 12px;
-      background: #222;
-      border-bottom: 1px solid #333;
-      flex-shrink: 0;
-    }
+    body { background: #1a1a1a; display: flex; flex-direction: column; height: 100vh; font-family: -apple-system, sans-serif; overflow: hidden; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #222; border-bottom: 1px solid #333; flex-shrink: 0; }
     h1 { color: #fff; font-size: 15px; }
     .stats { display: flex; gap: 10px; align-items: center; }
     .stat { color: #888; font-size: 11px; background: #333; padding: 2px 8px; border-radius: 3px; }
@@ -183,100 +147,26 @@ export class ScreenViewer {
     .controls { display: flex; gap: 5px; align-items: center; }
     .btn { background: #444; color: #fff; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; }
     .btn:hover { background: #555; }
-    .btn.active { background: #4CAF50; }
     .zoom-controls { display: flex; align-items: center; gap: 3px; }
     .zoom-btn { background: #444; color: #fff; border: none; width: 22px; height: 22px; border-radius: 3px; cursor: pointer; font-size: 13px; }
     .zoom-btn:hover { background: #555; }
     .zoom-value { color: #fff; font-size: 11px; min-width: 35px; text-align: center; }
     .main { flex: 1; display: flex; overflow: hidden; }
-    #screen-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      position: relative;
-    }
-    #screen-wrapper {
-      position: relative;
-      transform-origin: center center;
-    }
-    #screen {
-      display: block;
-      max-width: 100%;
-      max-height: calc(100vh - 40px);
-      user-select: none;
-    }
-    #overlay {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      cursor: crosshair;
-    }
-    .sidebar {
-      width: 350px;
-      background: #1e1e1e;
-      border-left: 1px solid #333;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-    .sidebar-header {
-      padding: 8px 12px;
-      background: #252525;
-      border-bottom: 1px solid #333;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    #screen-container { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
+    #screen-wrapper { position: relative; transform-origin: center center; }
+    #screen { display: block; max-width: 100%; max-height: calc(100vh - 40px); user-select: none; }
+    #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+    .sidebar { width: 350px; background: #1e1e1e; border-left: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { padding: 8px 12px; background: #252525; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
     .sidebar-header h2 { color: #fff; font-size: 13px; }
-    .sidebar-toggle { cursor: pointer; color: #888; font-size: 18px; }
-    .sidebar-toggle:hover { color: #fff; }
-    #shell-output {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px;
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 12px;
-      color: #d4d4d4;
-      background: #1e1e1e;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-    .shell-input {
-      display: flex;
-      padding: 8px;
-      background: #252525;
-      border-top: 1px solid #333;
-    }
+    #shell-output { flex: 1; overflow-y: auto; padding: 8px; font-family: monospace; font-size: 12px; color: #d4d4d4; background: #1e1e1e; white-space: pre-wrap; }
+    .shell-input { display: flex; padding: 8px; background: #252525; border-top: 1px solid #333; }
     .shell-input span { color: #4CAF50; font-family: monospace; margin-right: 8px; line-height: 28px; }
-    #shell-cmd {
-      flex: 1;
-      background: #333;
-      border: 1px solid #444;
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 3px;
-      font-family: monospace;
-      font-size: 12px;
-    }
+    #shell-cmd { flex: 1; background: #333; border: 1px solid #444; color: #fff; padding: 4px 8px; border-radius: 3px; font-family: monospace; font-size: 12px; }
     #shell-cmd:focus { outline: none; border-color: #4CAF50; }
-    .status {
-      position: fixed;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #888;
-      font-size: 11px;
-      background: rgba(0,0,0,0.8);
-      padding: 3px 10px;
-      border-radius: 3px;
-      z-index: 10;
-    }
-    .status.connected { color: #4CAF50; }
-    .status.error { color: #f44336; }
     .collapsed .sidebar { width: 0; overflow: hidden; }
-    .collapsed .sidebar-header, .collapsed .shell-input, .collapsed #shell-output { display: none; }
+    .status { position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); color: #888; font-size: 11px; background: rgba(0,0,0,0.8); padding: 3px 10px; border-radius: 3px; z-index: 10; }
+    .status.connected { color: #4CAF50; }
   </style>
 </head>
 <body>
@@ -306,12 +196,12 @@ export class ScreenViewer {
     <div class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h2>Shell</h2>
-        <span class="sidebar-toggle" onclick="toggleShell()">×</span>
+        <span style="cursor:pointer;color:#888" onclick="toggleShell()">×</span>
       </div>
       <div id="shell-output"></div>
       <div class="shell-input">
         <span>$</span>
-        <input type="text" id="shell-cmd" placeholder="Enter command..." onkeydown="if(event.key==='Enter')sendShell()" />
+        <input type="text" id="shell-cmd" placeholder="Enter command..." />
       </div>
     </div>
   </div>
@@ -320,139 +210,92 @@ export class ScreenViewer {
   <script>
     const img = document.getElementById('screen');
     const overlay = document.getElementById('overlay');
-    const status = document.getElementById('status');
-    const fpsDisplay = document.getElementById('fps');
-    const latencyDisplay = document.getElementById('latency');
-    const zoomDisplay = document.getElementById('zoom');
-    const screenWrapper = document.getElementById('screen-wrapper');
-    const shellOutput = document.getElementById('shell-output');
-    const shellCmd = document.getElementById('shell-cmd');
-    const main = document.getElementById('main');
+    const statusEl = document.getElementById('status');
+    const fpsEl = document.getElementById('fps');
+    const latencyEl = document.getElementById('latency');
+    const zoomEl = document.getElementById('zoom');
+    const wrapper = document.getElementById('screen-wrapper');
+    const shellOut = document.getElementById('shell-output');
+    const shellIn = document.getElementById('shell-cmd');
+    const mainEl = document.getElementById('main');
     
-    let frameCount = 0;
-    let lastTime = Date.now();
-    let lastFrameTime = Date.now();
-    let currentZoom = 100;
-    let shellVisible = true;
-    let lastShellOutput = '';
+    let frames = 0, lastSec = Date.now(), lastFrame = Date.now(), zoom = 100, shellOn = true;
     
-    function toggleShell() {
-      shellVisible = !shellVisible;
-      main.classList.toggle('collapsed', !shellVisible);
-    }
-    
-    function zoomIn() { currentZoom = Math.min(200, currentZoom + 10); applyZoom(); }
-    function zoomOut() { currentZoom = Math.max(25, currentZoom - 10); applyZoom(); }
+    function toggleShell() { shellOn = !shellOn; mainEl.classList.toggle('collapsed', !shellOn); }
+    function zoomIn() { zoom = Math.min(200, zoom + 10); applyZoom(); }
+    function zoomOut() { zoom = Math.max(25, zoom - 10); applyZoom(); }
     function zoomFit() {
       const c = document.getElementById('screen-container');
-      const cw = c.clientWidth - 10;
-      const ch = c.clientHeight - 10;
-      const iw = img.naturalWidth || 1920;
-      const ih = img.naturalHeight || 1080;
-      currentZoom = Math.round(Math.min(cw / iw, ch / ih) * 100);
+      zoom = Math.round(Math.min((c.clientWidth-10)/(img.naturalWidth||1920), (c.clientHeight-10)/(img.naturalHeight||1080)) * 100);
       applyZoom();
     }
-    function applyZoom() {
-      screenWrapper.style.transform = 'scale(' + (currentZoom / 100) + ')';
-      zoomDisplay.textContent = currentZoom + '%';
-    }
+    function applyZoom() { wrapper.style.transform = 'scale('+(zoom/100)+')'; zoomEl.textContent = zoom+'%'; }
     
     function getCoords(e) {
-      const rect = overlay.getBoundingClientRect();
-      const iw = img.naturalWidth || 1920;
-      const ih = img.naturalHeight || 1080;
-      const x = Math.round((e.clientX - rect.left) / rect.width * iw);
-      const y = Math.round((e.clientY - rect.top) / rect.height * ih);
-      return { x: Math.max(0, Math.min(iw, x)), y: Math.max(0, Math.min(ih, y)) };
+      const r = overlay.getBoundingClientRect();
+      return { x: Math.max(0, Math.round((e.clientX-r.left)/r.width*(img.naturalWidth||1920))), y: Math.max(0, Math.round((e.clientY-r.top)/r.height*(img.naturalHeight||1080))) };
     }
     
-    function sendInput(data) {
-      fetch('/input', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      }).catch(() => {});
-    }
+    function send(data) { fetch('/input', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }).catch(()=>{}); }
     
     function sendShell() {
-      const cmd = shellCmd.value.trim();
+      const cmd = shellIn.value.trim();
       if (!cmd) return;
-      shellOutput.textContent += '$ ' + cmd + '\\n';
-      shellOutput.scrollTop = shellOutput.scrollHeight;
-      fetch('/shell', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: cmd })
-      }).catch(() => {});
-      shellCmd.value = '';
+      shellOut.textContent += '$ ' + cmd + '\\n';
+      shellOut.scrollTop = shellOut.scrollHeight;
+      fetch('/shell', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({command:cmd}) }).catch(()=>{});
+      shellIn.value = '';
     }
     
-    function pollShellOutput() {
-      fetch('/shell-output')
-        .then(r => r.text())
-        .then(text => {
-          if (text !== lastShellOutput) {
-            shellOutput.textContent = text;
-            shellOutput.scrollTop = shellOutput.scrollHeight;
-            lastShellOutput = text;
-          }
-        })
-        .catch(() => {});
-    }
-    setInterval(pollShellOutput, 500);
-    
-    overlay.addEventListener('mousemove', (e) => {
-      const { x, y } = getCoords(e);
-      sendInput({ type: 'mouse', action: 'move', x, y });
+    shellIn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { sendShell(); e.preventDefault(); }
+      e.stopPropagation();
     });
     
-    overlay.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      const { x, y } = getCoords(e);
-      const button = e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle';
-      sendInput({ type: 'mouse', action: 'click', x, y, button });
-    });
+    setInterval(() => {
+      fetch('/shell-output').then(r=>r.text()).then(t => {
+        if (t !== shellOut._last) { shellOut.textContent = t; shellOut.scrollTop = shellOut.scrollHeight; shellOut._last = t; }
+      }).catch(()=>{});
+    }, 500);
     
-    overlay.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      sendInput({ type: 'mouse', action: 'scroll', direction: e.deltaY < 0 ? 'up' : 'down' });
-    });
-    
+    overlay.addEventListener('mousemove', (e) => { const p = getCoords(e); send({type:'mouse',action:'move',x:p.x,y:p.y}); });
+    overlay.addEventListener('mousedown', (e) => { e.preventDefault(); const p = getCoords(e); send({type:'mouse',action:'click',x:p.x,y:p.y,button:e.button===0?'left':e.button===2?'right':'middle'}); });
+    overlay.addEventListener('wheel', (e) => { e.preventDefault(); send({type:'mouse',action:'scroll',direction:e.deltaY<0?'up':'down'}); });
     overlay.addEventListener('contextmenu', (e) => e.preventDefault());
     
     document.addEventListener('keydown', (e) => {
-      if (e.target === shellCmd) return;
+      if (e.target === shellIn) return;
       e.preventDefault();
-      sendInput({ type: 'key', action: 'press', key: e.key });
+      send({type:'key',action:'press',key:e.key});
     });
     
     document.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.metaKey) {
-        if (e.key === '=' || e.key === '+') { e.preventDefault(); zoomIn(); }
-        else if (e.key === '-') { e.preventDefault(); zoomOut(); }
-        else if (e.key === '0') { e.preventDefault(); zoomFit(); }
+        if (e.key==='='||e.key==='+') { e.preventDefault(); zoomIn(); }
+        else if (e.key==='-') { e.preventDefault(); zoomOut(); }
+        else if (e.key==='0') { e.preventDefault(); zoomFit(); }
       }
     });
     
     document.addEventListener('wheel', (e) => {
-      if (e.ctrlKey || e.metaKey) { e.preventDefault(); e.deltaY < 0 ? zoomIn() : zoomOut(); }
-    }, { passive: false });
+      if (e.ctrlKey||e.metaKey) { e.preventDefault(); e.deltaY<0?zoomIn():zoomOut(); }
+    }, {passive:false});
     
     function connect() {
-      const events = new EventSource('/stream');
-      events.onopen = () => { status.textContent = 'Connected'; status.className = 'status connected'; };
-      events.onmessage = (e) => {
+      const es = new EventSource('/stream');
+      es.onopen = () => { statusEl.textContent='Connected'; statusEl.className='status connected'; };
+      es.onmessage = (e) => {
         const now = Date.now();
-        latencyDisplay.textContent = Math.min(now - lastFrameTime, 999);
-        lastFrameTime = now;
+        latencyEl.textContent = Math.min(now-lastFrame, 999);
+        lastFrame = now;
         img.src = 'data:image/jpeg;base64,' + e.data;
-        frameCount++;
-        if (now - lastTime >= 1000) { fpsDisplay.textContent = frameCount; frameCount = 0; lastTime = now; }
+        frames++;
+        if (now-lastSec>=1000) { fpsEl.textContent=frames; frames=0; lastSec=now; }
       };
-      events.onerror = () => { status.textContent = 'Disconnected...'; status.className = 'status error'; events.close(); setTimeout(connect, 2000); };
+      es.onerror = () => { statusEl.textContent='Disconnected...'; statusEl.className='status'; es.close(); setTimeout(connect, 2000); };
     }
     
-    img.onload = () => { if (currentZoom === 100) zoomFit(); };
+    img.onload = () => { if (zoom===100) zoomFit(); };
     connect();
   </script>
 </body>
