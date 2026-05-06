@@ -18,118 +18,10 @@ function prompt(prefix: string): Promise<string> {
   });
 }
 
-async function runAgent(proxyUrl?: string): Promise<void> {
+async function main(proxyUrl?: string) {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
-  const capture = new FFmpegCapture(0, 0, 60, 3);  // Auto-detect resolution
-  
-  // Limit frame buffer to prevent memory leak
-  let lastFrame: Buffer | null = null;
-  
-  try {
-    await client.connect();
-  } catch (e) {
-    console.log('Failed to connect');
-    rl.close();
-    return;
-  }
-
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  const clientId = client.getClientId();
-  if (clientId) {
-    console.log('');
-    console.log('========================================');
-    console.log(`  Agent ID: ${clientId}`);
-    console.log('========================================');
-    console.log('');
-  }
-
-  let frameCount = 0;
-  let lastFpsTime = Date.now();
-  let currentFps = 0;
-  let targetPeer: string | null = null;
-
-  client.onMessage((msg: SignalMessage) => {
-    switch (msg.type) {
-      case 'screen-request':
-        targetPeer = msg.id || null;
-        if (targetPeer) {
-          console.log(`[SCREEN] Request from ${targetPeer}`);
-          capture.start((frame) => {
-            client.send({
-              type: 'screen',
-              to: targetPeer,
-              data: { frame: frame.toString('base64') }
-            });
-            frameCount++;
-            const now = Date.now();
-            if (now - lastFpsTime >= 1000) {
-              currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
-              frameCount = 0;
-              lastFpsTime = now;
-              process.stdout.write(`\r[FPS: ${currentFps}] `);
-            }
-          });
-        }
-        break;
-        
-      case 'shell':
-        if (msg.data?.command) {
-          const senderId = msg.id;
-          console.log(`[SHELL] ${msg.data.command}`);
-          executeCommand(msg.data.command).then(output => {
-            if (senderId) {
-              client.send({ type: 'shell-output', to: senderId, data: { output } });
-            }
-          });
-        }
-        break;
-    }
-  });
-
-  console.log('Commands:');
-  console.log('  stream  - Start screen sharing');
-  console.log('  stop    - Stop sharing');
-  console.log('  quit    - Exit');
-  console.log('');
-
-  while (true) {
-    const inputCmd = await prompt('agent');
-    if (inputCmd.trim() === 'quit' || inputCmd.trim() === 'exit') break;
-    
-    if (inputCmd.trim() === 'stream') {
-      console.log('Starting stream...');
-      capture.start((frame) => {
-        if (!targetPeer) return;
-        client.send({
-          type: 'screen',
-          to: targetPeer,
-          data: { frame: frame.toString('base64') }
-        });
-        frameCount++;
-        const now = Date.now();
-        if (now - lastFpsTime >= 1000) {
-          currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
-          frameCount = 0;
-          lastFpsTime = now;
-          process.stdout.write(`\r[FPS: ${currentFps}] `);
-        }
-      });
-    } else if (inputCmd.trim() === 'stop') {
-      capture.stop();
-      console.log('');
-    }
-  }
-
-  capture.stop();
-  client.disconnect();
-  rl.close();
-}
-
-async function runController(proxyUrl?: string): Promise<void> {
-  const client = new SignalClient(SIGNAL_URL, proxyUrl);
+  const capture = new FFmpegCapture(0, 0, 60, 3);
   const viewer = new ScreenViewer(8080);
-  let viewerStarted = false;
   
   try {
     await client.connect();
@@ -145,26 +37,20 @@ async function runController(proxyUrl?: string): Promise<void> {
   if (clientId) {
     console.log('');
     console.log('========================================');
-    console.log(`  Controller ID: ${clientId}`);
+    console.log(`  Your ID: ${clientId}`);
     console.log('========================================');
     console.log('');
   }
 
   let targetPeer: string | null = null;
+  let viewerStarted = false;
   let frameCount = 0;
   let lastFpsTime = Date.now();
   let currentFps = 0;
 
-  viewer.setShellCallback((command) => {
-    if (!targetPeer) {
-      viewer.appendShellOutput('Error: No target\n');
-      return;
-    }
-    console.log(`[SHELL] ${command}`);
-    client.send({ type: 'shell', to: targetPeer, data: { command } });
-  });
-
+  // Handle incoming messages
   client.onMessage((msg: SignalMessage) => {
+    // Screen frame received
     if (msg.type === 'screen' && msg.data?.frame) {
       if (!viewerStarted) {
         viewer.start();
@@ -181,59 +67,120 @@ async function runController(proxyUrl?: string): Promise<void> {
         process.stdout.write(`\r[FPS: ${currentFps}] `);
       }
     }
+
+    // Screen request received - start sharing
+    if (msg.type === 'screen-request' && msg.id) {
+      console.log(`[SHARE] ${msg.id} requested screen`);
+      targetPeer = msg.id;
+      capture.start((frame) => {
+        if (!targetPeer) return;
+        client.send({
+          type: 'screen',
+          to: targetPeer,
+          data: { frame: frame.toString('base64') }
+        });
+      });
+    }
+
+    // Shell output received
     if (msg.type === 'shell-output' && msg.data?.output) {
       viewer.appendShellOutput(msg.data.output);
     }
+
+    // Shell command received - execute
+    if (msg.type === 'shell' && msg.data?.command && msg.id) {
+      console.log(`[SHELL] ${msg.data.command}`);
+      executeCommand(msg.data.command).then(output => {
+        client.send({ type: 'shell-output', to: msg.id!, data: { output } });
+      });
+    }
+  });
+
+  // Shell callback from viewer
+  viewer.setShellCallback((command) => {
+    if (!targetPeer) {
+      viewer.appendShellOutput('Error: No peer connected\n');
+      return;
+    }
+    console.log(`[SHELL] ${command}`);
+    client.send({ type: 'shell', to: targetPeer, data: { command } });
   });
 
   console.log('Commands:');
-  console.log('  connect <id>  - Connect to agent');
-  console.log('  view          - Start viewing');
+  console.log('  connect <id>  - Connect to peer');
+  console.log('  view          - View remote screen');
+  console.log('  share         - Share your screen');
+  console.log('  stop          - Stop sharing');
   console.log('  quit          - Exit');
   console.log('');
 
   while (true) {
-    const input = await prompt('ctrl');
+    const input = await prompt('xdesk');
     const parts = input.trim().split(/\s+/);
     if (parts[0] === 'quit' || parts[0] === 'exit') break;
-    
+
     switch (parts[0]) {
       case 'connect':
-        if (parts.length < 2) console.log('Usage: connect <agent-id>');
-        else { targetPeer = parts[1]; console.log(`Target: ${targetPeer}`); }
-        break;
-      case 'view':
-        if (!targetPeer) {
-          console.log('No target. Use: connect <id>');
+        if (parts.length < 2) {
+          console.log('Usage: connect <peer-id>');
         } else {
-          if (!viewerStarted) {
-            viewer.start();
-            viewerStarted = true;
-            console.log('Screen viewer: http://localhost:8080');
-          }
+          targetPeer = parts[1];
+          console.log(`Connected to: ${targetPeer}`);
+          // Auto-request screen
+          client.send({ type: 'screen-request', to: targetPeer, data: { fps: 60 } });
           console.log('Requesting screen...');
-          client.send({ type: 'screen-request', to: targetPeer, data: { fps: 30 } });
         }
         break;
+
+      case 'view':
+        if (!targetPeer) {
+          console.log('No peer. Use: connect <id>');
+        } else {
+          client.send({ type: 'screen-request', to: targetPeer, data: { fps: 60 } });
+          console.log('Requesting screen...');
+        }
+        break;
+
+      case 'share':
+        console.log('Sharing your screen...');
+        capture.start((frame) => {
+          if (!targetPeer) return;
+          client.send({
+            type: 'screen',
+            to: targetPeer,
+            data: { frame: frame.toString('base64') }
+          });
+        });
+        break;
+
+      case 'stop':
+        capture.stop();
+        console.log('Stopped sharing');
+        break;
+
+      case 'peers':
+        const peers = client.getPeers();
+        if (peers.length === 0) {
+          console.log('No peers online');
+        } else {
+          console.log('Online peers:');
+          peers.forEach(p => console.log(`  ${p}`));
+        }
+        break;
+
+      default:
+        if (input.trim()) console.log('Unknown command');
     }
   }
 
+  capture.stop();
   if (viewerStarted) viewer.stop();
   client.disconnect();
   rl.close();
 }
 
-console.log('=== xdesk Remote Desktop Client ===');
+console.log('=== xdesk Remote Desktop ===');
 console.log('');
 
-const mode = process.argv[2];
-const proxy = process.argv[3];
-
-if (mode === 'agent') runAgent(proxy).catch(console.error);
-else if (mode === 'controller') runController(proxy).catch(console.error);
-else {
-  console.log('Usage:');
-  console.log('  npm run agent       - Start as agent');
-  console.log('  npm run controller  - Start as controller');
-  rl.close();
-}
+const proxy = process.argv[2];
+main(proxy).catch(console.error);
