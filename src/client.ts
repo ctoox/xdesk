@@ -17,7 +17,7 @@ export class SignalClient {
   constructor(url: string, proxyUrl?: string) {
     this.url = url;
     // Auto-detect proxy from environment
-    this.proxyUrl = proxyUrl || process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7890';
+    this.proxyUrl = proxyUrl || process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7897';
   }
 
   connect(): Promise<void> {
