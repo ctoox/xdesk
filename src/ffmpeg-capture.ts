@@ -35,15 +35,16 @@ export class FFmpegCapture {
     let ffmpegPath = 'ffmpeg';
     const paths = [
       'C:\\ffmpeg\\bin\\ffmpeg.exe',
-      'C:\\Users\\ctooc\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-7.1.1-full_build\\bin\\ffmpeg.exe'
+      'C:\\Users\\ctooc\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-7.1.1-full_build\\bin\\ffmpeg.exe',
+      process.env.FFMPEG_PATH || '',
+      'ffmpeg'
     ];
     
     for (const p of paths) {
-      try {
-        require('fs').accessSync(p);
+      if (p && require('fs').existsSync(p)) {
         ffmpegPath = p;
         break;
-      } catch (e) {}
+      }
     }
 
     console.log(`[FFmpeg] Using: ${ffmpegPath}`);
