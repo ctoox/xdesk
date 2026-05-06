@@ -103,36 +103,37 @@ export class ScreenViewer {
   <title>xdesk</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; display: flex; height: 100vh; font-family: -apple-system, sans-serif; overflow: hidden; }
-    .main { flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
-    .header { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #1a1a1a; border-bottom: 1px solid #333; flex-shrink: 0; }
-    .header span { color: #888; font-size: 12px; }
-    .header b { color: #4CAF50; }
-    .screen-container { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 4px; }
-    #screen { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
-    .sidebar { width: 320px; background: #1a1a1a; border-left: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
-    .sidebar-h { padding: 8px 12px; background: #222; color: #fff; font-size: 12px; border-bottom: 1px solid #333; }
-    #out { flex: 1; overflow-y: auto; padding: 8px; font-family: 'Cascadia Code', Consolas, monospace; font-size: 11px; color: #d4d4d4; white-space: pre-wrap; }
-    .input { display: flex; padding: 8px; background: #222; border-top: 1px solid #333; }
-    .prompt { color: #4CAF50; font-family: monospace; margin-right: 6px; line-height: 24px; font-size: 12px; }
-    #cmd { flex: 1; background: #333; border: 1px solid #444; color: #fff; padding: 4px 8px; border-radius: 3px; font-family: monospace; font-size: 12px; }
+    html, body { height: 100%; overflow: hidden; background: #000; }
+    body { display: flex; font-family: -apple-system, sans-serif; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; background: #1e1e1e; border-bottom: 1px solid #333; height: 32px; flex-shrink: 0; }
+    .toolbar span { color: #888; font-size: 11px; }
+    .toolbar b { color: #4CAF50; }
+    .view { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #111; }
+    #screen { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .sidebar { width: 300px; background: #1a1a1a; border-left: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-h { padding: 6px 10px; background: #252525; color: #ccc; font-size: 11px; border-bottom: 1px solid #333; }
+    #out { flex: 1; overflow-y: auto; padding: 6px; font-family: Consolas, monospace; font-size: 11px; color: #d4d4d4; white-space: pre-wrap; }
+    .input-bar { display: flex; padding: 6px; background: #252525; border-top: 1px solid #333; }
+    .prompt { color: #4CAF50; font-family: monospace; margin-right: 6px; line-height: 22px; }
+    #cmd { flex: 1; background: #333; border: 1px solid #444; color: #fff; padding: 3px 8px; border-radius: 3px; font-family: monospace; font-size: 11px; }
     #cmd:focus { outline: none; border-color: #4CAF50; }
   </style>
 </head>
 <body>
   <div class="main">
-    <div class="header">
+    <div class="toolbar">
       <span>xdesk</span>
       <span>FPS: <b id="fps">0</b> | 延迟: <b id="lat">0</b>ms</span>
     </div>
-    <div class="screen-container">
-      <img id="screen" src="" alt="Waiting..." />
+    <div class="view">
+      <img id="screen" src="" alt="" />
     </div>
   </div>
   <div class="sidebar">
     <div class="sidebar-h">Shell</div>
     <div id="out"></div>
-    <div class="input">
+    <div class="input-bar">
       <span class="prompt">$</span>
       <input type="text" id="cmd" placeholder="Command..." />
     </div>
@@ -166,7 +167,7 @@ export class ScreenViewer {
     
     function connect() {
       const es = new EventSource('/stream');
-      es.onopen = () => { document.title = 'xdesk - Connected'; };
+      es.onopen = () => { document.title = 'xdesk'; };
       es.onmessage = e => {
         const now = Date.now();
         latEl.textContent = Math.min(now - lastFrame, 999);
