@@ -11,6 +11,7 @@ export class SignalClient {
   private maxReconnectDelay: number = 30000;
   private shouldReconnect: boolean = true;
   private onMessageCallback: ((msg: SignalMessage) => void) | null = null;
+  private pingInterval: NodeJS.Timeout | null = null;
 
   constructor(url: string, proxyUrl?: string) {
     this.url = url;
@@ -27,10 +28,7 @@ export class SignalClient {
         try {
           const { HttpsProxyAgent } = require('https-proxy-agent');
           options.agent = new HttpsProxyAgent(this.proxyUrl);
-          console.log(`Using proxy: ${this.proxyUrl}`);
-        } catch (e) {
-          console.warn('Failed to load proxy agent, connecting directly');
-        }
+        } catch (e) {}
       }
 
       this.ws = new WebSocket(this.url, options);
@@ -38,6 +36,10 @@ export class SignalClient {
       this.ws.on('open', () => {
         console.log('Connected to signal server');
         this.reconnectDelay = 3000;
+        
+        // Start heartbeat
+        this.startHeartbeat();
+        
         resolve();
       });
 
@@ -45,13 +47,12 @@ export class SignalClient {
         try {
           const msg: SignalMessage = JSON.parse(data.toString());
           this.handleMessage(msg);
-        } catch (e) {
-          console.error('Failed to parse message:', e);
-        }
+        } catch (e) {}
       });
 
       this.ws.on('close', () => {
         console.log('Disconnected');
+        this.stopHeartbeat();
         this.clientId = null;
         if (this.shouldReconnect) {
           this.scheduleReconnect();
@@ -64,7 +65,27 @@ export class SignalClient {
           reject(err);
         }
       });
+
+      this.ws.on('pong', () => {
+        // Connection is alive
+      });
     });
+  }
+
+  private startHeartbeat(): void {
+    this.stopHeartbeat();
+    this.pingInterval = setInterval(() => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.ping();
+      }
+    }, 30000); // Ping every 30 seconds
+  }
+
+  private stopHeartbeat(): void {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
   }
 
   private scheduleReconnect(): void {
@@ -88,13 +109,7 @@ export class SignalClient {
         }
         break;
       case 'test':
-        console.log(`[MESSAGE] from ${msg.id}: ${msg.data?.message || 'no data'}`);
-        break;
-      case 'mouse':
-      case 'key':
-      case 'screen':
-      case 'screen-request':
-      case 'screen-info':
+        console.log(`[MESSAGE] from ${msg.id}: ${msg.data?.message || ''}`);
         break;
       default:
         break;
@@ -107,40 +122,12 @@ export class SignalClient {
 
   send(msg: SignalMessage): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      const fullMsg = {
-        ...msg,
-        id: this.clientId || undefined
-      };
-      this.ws.send(JSON.stringify(fullMsg));
+      this.ws.send(JSON.stringify({ ...msg, id: this.clientId || undefined }));
     }
   }
 
   sendTest(to: string, message: string): void {
     this.send({ type: 'test', to, data: { message } });
-  }
-
-  sendMouseMove(to: string, x: number, y: number): void {
-    this.send({ type: 'mouse', to, data: { action: 'move', x, y } });
-  }
-
-  sendMouseClick(to: string, x: number, y: number, button: string = 'left'): void {
-    this.send({ type: 'mouse', to, data: { action: 'click', x, y, button } });
-  }
-
-  sendKeyDown(to: string, key: string): void {
-    this.send({ type: 'key', to, data: { action: 'down', key } });
-  }
-
-  sendKeyUp(to: string, key: string): void {
-    this.send({ type: 'key', to, data: { action: 'up', key } });
-  }
-
-  sendKeyPress(to: string, key: string): void {
-    this.send({ type: 'key', to, data: { action: 'press', key } });
-  }
-
-  sendTypeText(to: string, text: string): void {
-    this.send({ type: 'key', to, data: { action: 'type', text } });
   }
 
   onMessage(callback: (msg: SignalMessage) => void): void {
@@ -157,6 +144,7 @@ export class SignalClient {
 
   disconnect(): void {
     this.shouldReconnect = false;
+    this.stopHeartbeat();
     if (this.ws) {
       this.ws.close();
     }

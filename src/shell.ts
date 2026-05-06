@@ -1,70 +1,48 @@
 import { exec, spawn, ChildProcess } from 'child_process';
 
-export class ShellManager {
-  private shell: ChildProcess | null = null;
-  private outputCallback: ((data: string) => void) | null = null;
-
-  constructor() {}
-
-  start(onOutput: (data: string) => void): void {
-    this.outputCallback = onOutput;
-    
-    const isWindows = process.platform === 'win32';
-    const shellCmd = isWindows ? 'powershell.exe' : 'bash';
-    
-    this.shell = spawn(shellCmd, [], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env, TERM: 'xterm-256color' }
-    });
-
-    this.shell.stdout?.on('data', (data) => {
-      if (this.outputCallback) {
-        this.outputCallback(data.toString());
-      }
-    });
-
-    this.shell.stderr?.on('data', (data) => {
-      if (this.outputCallback) {
-        this.outputCallback(data.toString());
-      }
-    });
-
-    this.shell.on('close', () => {
-      this.shell = null;
-    });
-
-    if (this.outputCallback) {
-      this.outputCallback('Shell started\n');
-    }
-  }
-
-  execute(command: string): void {
-    if (!this.shell) {
-      return;
-    }
-    this.shell.stdin?.write(command + '\n');
-  }
-
-  stop(): void {
-    if (this.shell) {
-      this.shell.kill();
-      this.shell = null;
-    }
-  }
-
-  isRunning(): boolean {
-    return this.shell !== null;
-  }
-}
-
 export function executeCommand(command: string): Promise<string> {
   return new Promise((resolve) => {
-    exec(command, { encoding: 'utf8', maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
-      if (err) {
-        resolve(stderr || err.message);
-      } else {
+    const isWindows = process.platform === 'win32';
+    
+    if (isWindows) {
+      // Use PowerShell with UTF-8 encoding
+      const ps = spawn('powershell.exe', ['-NoProfile', '-Command', command], {
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      ps.stdout?.on('data', (data) => {
+        stdout += data.toString('utf8');
+      });
+
+      ps.stderr?.on('data', (data) => {
+        stderr += data.toString('utf8');
+      });
+
+      ps.on('close', () => {
         resolve(stdout || stderr || 'Command executed');
-      }
-    });
+      });
+
+      ps.on('error', (err) => {
+        resolve(`Error: ${err.message}`);
+      });
+
+      // Timeout after 30 seconds
+      setTimeout(() => {
+        ps.kill();
+        resolve('Command timed out');
+      }, 30000);
+    } else {
+      exec(command, { encoding: 'utf8', maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
+        if (err) {
+          resolve(stderr || err.message);
+        } else {
+          resolve(stdout || stderr || 'Command executed');
+        }
+      });
+    }
   });
 }
