@@ -47,6 +47,9 @@ export class ScreenViewer {
         this.clients.add(res);
         if (this.currentFrame) res.write(`data: ${this.currentFrame}\n\n`);
         req.on('close', () => { this.clients.delete(res); });
+      } else if (req.url === '/frame') {
+        res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+        res.end(this.currentFrame || '');
       } else if (req.url === '/shell' && req.method === 'POST') {
         let body = '';
         req.on('data', (chunk) => body += chunk);
@@ -68,7 +71,7 @@ export class ScreenViewer {
     });
 
     this.server.listen(this.port, () => {
-      console.log(`Screen viewer: http://localhost:${this.port}`);
+      console.log(`Viewer: http://localhost:${this.port}`);
     });
 
     setInterval(() => {
@@ -82,11 +85,11 @@ export class ScreenViewer {
     }, 1000);
   }
 
-  updateFrame(frame: string): void {
-    this.currentFrame = frame;
+  updateFrame(frameBase64: string): void {
+    this.currentFrame = frameBase64;
     this.frameCount++;
     for (const client of this.clients) {
-      try { client.write(`data: ${frame}\n\n`); } catch (e) { this.clients.delete(client); }
+      try { client.write(`data: ${frameBase64}\n\n`); } catch (e) { this.clients.delete(client); }
     }
   }
 
@@ -103,75 +106,67 @@ export class ScreenViewer {
   <title>xdesk</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #1a1a1a; display: flex; height: 100vh; font-family: -apple-system, sans-serif; overflow: hidden; }
-    .screen-area { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
-    .header { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: rgba(0,0,0,0.7); z-index: 10; }
-    .header h1 { color: #fff; font-size: 14px; }
-    .stats { display: flex; gap: 10px; }
-    .stat { color: #888; font-size: 11px; }
-    .stat b { color: #4CAF50; }
+    body { background: #111; display: flex; height: 100vh; font-family: -apple-system, sans-serif; overflow: hidden; }
+    .main { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+    .header { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; padding: 8px 15px; background: rgba(0,0,0,0.8); z-index: 10; }
+    .header span { color: #888; font-size: 12px; }
+    .header b { color: #4CAF50; }
     #screen { max-width: 100%; max-height: 100vh; display: block; }
-    .sidebar { width: 400px; background: #1e1e1e; border-left: 1px solid #333; display: flex; flex-direction: column; }
-    .sidebar-header { padding: 10px 15px; background: #252525; border-bottom: 1px solid #333; color: #fff; font-size: 13px; }
-    #shell-output { flex: 1; overflow-y: auto; padding: 10px; font-family: 'Cascadia Code', Consolas, monospace; font-size: 13px; color: #d4d4d4; background: #1e1e1e; white-space: pre-wrap; word-break: break-all; }
-    .input-area { display: flex; padding: 10px; background: #252525; border-top: 1px solid #333; }
-    .prompt { color: #4CAF50; font-family: monospace; margin-right: 10px; line-height: 30px; }
-    #cmd { flex: 1; background: #333; border: 1px solid #444; color: #fff; padding: 6px 10px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+    .sidebar { width: 380px; background: #1a1a1a; border-left: 1px solid #333; display: flex; flex-direction: column; }
+    .sidebar-h { padding: 10px; background: #222; color: #fff; font-size: 13px; border-bottom: 1px solid #333; }
+    #out { flex: 1; overflow-y: auto; padding: 10px; font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; color: #d4d4d4; white-space: pre-wrap; }
+    .input { display: flex; padding: 10px; background: #222; border-top: 1px solid #333; }
+    .prompt { color: #4CAF50; font-family: monospace; margin-right: 8px; line-height: 28px; }
+    #cmd { flex: 1; background: #333; border: 1px solid #444; color: #fff; padding: 5px 10px; border-radius: 4px; font-family: monospace; }
     #cmd:focus { outline: none; border-color: #4CAF50; }
-    .connected { color: #4CAF50; }
   </style>
 </head>
 <body>
-  <div class="screen-area">
+  <div class="main">
     <div class="header">
-      <h1>xdesk</h1>
-      <div class="stats">
-        <span class="stat">FPS: <b id="fps">0</b></span>
-        <span class="stat">延迟: <b id="latency">0</b>ms</span>
-      </div>
+      <span>xdesk</span>
+      <span>FPS: <b id="fps">0</b> | 延迟: <b id="lat">0</b>ms</span>
     </div>
     <img id="screen" src="" alt="Waiting..." />
   </div>
   <div class="sidebar">
-    <div class="sidebar-header">Shell</div>
-    <div id="shell-output"></div>
-    <div class="input-area">
+    <div class="sidebar-h">Shell</div>
+    <div id="out"></div>
+    <div class="input">
       <span class="prompt">$</span>
-      <input type="text" id="cmd" placeholder="Enter command..." />
+      <input type="text" id="cmd" placeholder="Command..." />
     </div>
   </div>
-  
   <script>
     const img = document.getElementById('screen');
     const fpsEl = document.getElementById('fps');
-    const latEl = document.getElementById('latency');
-    const out = document.getElementById('shell-output');
+    const latEl = document.getElementById('lat');
+    const out = document.getElementById('out');
     const cmd = document.getElementById('cmd');
+    let frames = 0, lastSec = Date.now(), lastFrame = Date.now(), lastOut = '';
     
-    let frames = 0, lastSec = Date.now(), lastFrame = Date.now(), lastOutput = '';
-    
-    cmd.addEventListener('keydown', (e) => {
+    cmd.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         const c = cmd.value.trim();
-        if (!c) return;
-        out.textContent += '$ ' + c + '\\n';
-        out.scrollTop = out.scrollHeight;
-        fetch('/shell', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({command:c}) });
-        cmd.value = '';
+        if (c) {
+          out.textContent += '$ ' + c + '\\n';
+          out.scrollTop = out.scrollHeight;
+          fetch('/shell', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({command:c}) });
+          cmd.value = '';
+        }
       }
       e.stopPropagation();
     });
     
     setInterval(() => {
       fetch('/shell-output').then(r => r.text()).then(t => {
-        if (t !== lastOutput) { out.textContent = t; out.scrollTop = out.scrollHeight; lastOutput = t; }
+        if (t !== lastOut) { out.textContent = t; out.scrollTop = out.scrollHeight; lastOut = t; }
       }).catch(() => {});
     }, 300);
     
     function connect() {
       const es = new EventSource('/stream');
-      es.onopen = () => { document.title = 'xdesk - Connected'; };
-      es.onmessage = (e) => {
+      es.onmessage = e => {
         const now = Date.now();
         latEl.textContent = Math.min(now - lastFrame, 999);
         lastFrame = now;
@@ -181,7 +176,6 @@ export class ScreenViewer {
       };
       es.onerror = () => { es.close(); setTimeout(connect, 2000); };
     }
-    
     connect();
   </script>
 </body>

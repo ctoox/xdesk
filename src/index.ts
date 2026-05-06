@@ -20,7 +20,7 @@ function prompt(prefix: string): Promise<string> {
 
 async function runAgent(proxyUrl?: string): Promise<void> {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
-  const capture = new ScreenCapture(20, 70, 0.75);
+  const capture = new ScreenCapture(30, 60, 0.5);
   
   try {
     await client.connect();
@@ -44,16 +44,25 @@ async function runAgent(proxyUrl?: string): Promise<void> {
   let frameCount = 0;
   let lastFpsTime = Date.now();
   let currentFps = 0;
+  let targetPeer: string | null = null;
 
   client.onMessage((msg: SignalMessage) => {
     switch (msg.type) {
       case 'screen-request':
-        const target = msg.id;
-        if (target) {
-          console.log(`[SCREEN] Request from ${target}`);
-          capture.setFps(msg.data?.fps || 20);
-          capture.startCapture((frame) => {
-            client.send({ type: 'screen', to: target, data: { frame, timestamp: Date.now() } });
+        targetPeer = msg.id || null;
+        if (targetPeer) {
+          console.log(`[SCREEN] Request from ${targetPeer}`);
+          capture.setFps(msg.data?.fps || 30);
+          
+          capture.startCapture((frame, isKeyframe) => {
+            // Send frame as binary with header
+            const header = Buffer.alloc(5);
+            header.writeUInt8(isKeyframe ? 1 : 0, 0);  // 1 = keyframe, 0 = diff
+            header.writeUInt32BE(frame.length, 1);
+            
+            const packet = Buffer.concat([header, frame]);
+            client.send(packet as any);  // Will be sent as binary
+            
             frameCount++;
             const now = Date.now();
             if (now - lastFpsTime >= 1000) {
@@ -83,31 +92,43 @@ async function runAgent(proxyUrl?: string): Promise<void> {
   console.log('Commands:');
   console.log('  stream  - Start screen sharing');
   console.log('  stop    - Stop sharing');
+  console.log('  fps <n> - Set FPS (1-60)');
   console.log('  quit    - Exit');
   console.log('');
 
   while (true) {
     const inputCmd = await prompt('agent');
-    if (inputCmd.trim() === 'quit' || inputCmd.trim() === 'exit') break;
+    const parts = inputCmd.trim().split(/\s+/);
+    if (parts[0] === 'quit' || parts[0] === 'exit') break;
     
-    if (inputCmd.trim() === 'stream') {
-      console.log('Starting screen stream...');
-      capture.startCapture((frame) => {
-        client.getPeers().forEach(peer => {
-          client.send({ type: 'screen', to: peer, data: { frame, timestamp: Date.now() } });
+    switch (parts[0]) {
+      case 'stream':
+        console.log('Starting stream...');
+        capture.startCapture((frame, isKeyframe) => {
+          if (!targetPeer) return;
+          const header = Buffer.alloc(5);
+          header.writeUInt8(isKeyframe ? 1 : 0, 0);
+          header.writeUInt32BE(frame.length, 1);
+          client.send(Buffer.concat([header, frame]) as any);
+          
+          frameCount++;
+          const now = Date.now();
+          if (now - lastFpsTime >= 1000) {
+            currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+            frameCount = 0;
+            lastFpsTime = now;
+            process.stdout.write(`\r[FPS: ${currentFps}] `);
+          }
         });
-        frameCount++;
-        const now = Date.now();
-        if (now - lastFpsTime >= 1000) {
-          currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
-          frameCount = 0;
-          lastFpsTime = now;
-          process.stdout.write(`\r[FPS: ${currentFps}] `);
-        }
-      });
-    } else if (inputCmd.trim() === 'stop') {
-      capture.stopCapture();
-      console.log('');
+        break;
+      case 'stop':
+        capture.stopCapture();
+        console.log('');
+        break;
+      case 'fps':
+        if (parts[1]) capture.setFps(parseInt(parts[1]));
+        console.log(`FPS: ${capture.getStats().fps}`);
+        break;
     }
   }
 
@@ -147,31 +168,41 @@ async function runController(proxyUrl?: string): Promise<void> {
 
   viewer.setShellCallback((command) => {
     if (!targetPeer) {
-      viewer.appendShellOutput('Error: No target connected\n');
+      viewer.appendShellOutput('Error: No target\n');
       return;
     }
     console.log(`[SHELL] ${command}`);
     client.send({ type: 'shell', to: targetPeer, data: { command } });
   });
 
-  client.onMessage((msg: SignalMessage) => {
-    if (msg.type === 'screen' && msg.data?.frame) {
-      if (!viewerStarted) {
-        viewer.start();
-        viewerStarted = true;
-        console.log('Screen viewer: http://localhost:8080');
-        console.log('');
-      }
-      viewer.updateFrame(msg.data.frame);
-      frameCount++;
-      const now = Date.now();
-      if (now - lastFpsTime >= 1000) {
-        currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
-        frameCount = 0;
-        lastFpsTime = now;
-        process.stdout.write(`\r[FPS: ${currentFps}] `);
-      }
+  // Handle binary frames
+  client.onBinary((data: Buffer) => {
+    if (data.length < 5) return;
+    
+    const isKeyframe = data.readUInt8(0) === 1;
+    const frameLen = data.readUInt32BE(1);
+    const frame = data.slice(5, 5 + frameLen);
+    
+    if (!viewerStarted) {
+      viewer.start();
+      viewerStarted = true;
+      console.log('Screen viewer: http://localhost:8080');
+      console.log('');
     }
+    
+    viewer.updateFrame(frame.toString('base64'));
+    
+    frameCount++;
+    const now = Date.now();
+    if (now - lastFpsTime >= 1000) {
+      currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+      frameCount = 0;
+      lastFpsTime = now;
+      process.stdout.write(`\r[FPS: ${currentFps}] `);
+    }
+  });
+
+  client.onMessage((msg: SignalMessage) => {
     if (msg.type === 'shell-output' && msg.data?.output) {
       viewer.appendShellOutput(msg.data.output);
     }
@@ -195,10 +226,8 @@ async function runController(proxyUrl?: string): Promise<void> {
         break;
       case 'view':
         if (!targetPeer) console.log('No target. Use: connect <id>');
-        else { console.log('Requesting screen...'); client.send({ type: 'screen-request', to: targetPeer, data: { fps: 20 } }); }
+        else { console.log('Requesting screen...'); client.send({ type: 'screen-request', to: targetPeer, data: { fps: 30 } }); }
         break;
-      default:
-        if (input.trim()) console.log('Unknown command');
     }
   }
 
