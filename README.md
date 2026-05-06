@@ -1,111 +1,160 @@
 # xdesk
 
-轻量级远程桌面控制软件，通过 Cloudflare Workers 实现全球可用的信令服务器。
+轻量级远程桌面控制软件，60 FPS，原画质，支持 Windows/Linux/macOS。
 
-## 功能特性
+## 特性
 
-### ✅ 已实现
-
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| 屏幕共享 | ✅ | **60 FPS**，原画质，自动检测分辨率 |
-| Shell 终端 | ✅ | 远程执行命令，UTF-8 编码 |
-| 自动重连 | ✅ | 断线自动重连 |
-| 心跳保活 | ✅ | 30 秒心跳防止断连 |
-| 浏览器查看 | ✅ | http://localhost:8080 |
-| 帧率显示 | ✅ | 实时 FPS 和延迟监控 |
-| 代理支持 | ✅ | 自动检测系统代理 |
-| 打包分发 | ✅ | 可打包成 exe |
-
-### 🔧 待完善
-
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| 键鼠控制 | 🔧 | 框架已实现，需要调试 |
-| WebRTC P2P | 🔧 | 已实现，NAT 穿透有问题 |
-| 多显示器 | 📋 | 计划中 |
-| 剪贴板同步 | 📋 | 计划中 |
-| 文件传输 | 📋 | 计划中 |
-
-## 性能指标
-
-| 指标 | 数值 |
-|------|------|
-| **帧率** | **60 FPS** |
-| 分辨率 | 自动检测（支持 4K） |
-| 延迟 | ~100-150ms |
-| 编码 | MJPEG（ffmpeg） |
-| 传输 | WebSocket + JSON base64 |
-
-### 延迟分析
-
-| 来源 | 延迟 |
-|------|------|
-| ffmpeg 捕获 | ~16ms |
-| JPEG 编码 | ~10ms |
-| base64 编码 | ~5ms |
-| WebSocket 传输 | ~50-100ms |
-| 浏览器渲染 | ~16ms |
-| **总计** | **~100-150ms** |
-
-**说明：** 延迟主要来自 WebSocket 传输（通过 Cloudflare Workers 中转）。对于远程桌面场景，100-150ms 延迟是可接受的。
+- **60 FPS** 流畅远程桌面
+- **原画质** 自动检测分辨率
+- **Shell 终端** 远程执行命令
+- **自动重连** 断线自动恢复
+- **跨平台** Windows/Linux/macOS
+- **零配置** 无需安装，直接运行
 
 ## 快速开始
+
+### 下载
+
+从 [Releases](https://github.com/ctoox/xdesk/releases) 下载对应平台的版本。
 
 ### 安装依赖
 
 ```bash
-# 克隆仓库
-git clone https://github.com/ctoox/xdesk.git
-cd xdesk
-npm install
-
-# 安装 ffmpeg（必需）
+# 安装 ffmpeg
+# Windows
 winget install Gyan.FFmpeg
+
+# macOS
+brew install ffmpeg
+
+# Linux (Ubuntu/Debian)
+sudo apt install ffmpeg
 ```
 
 ### 运行
 
-```powershell
-# Agent (被控端)
-npx ts-node src/index.ts agent
-agent> stream
+```bash
+# 直接运行
+./xdesk
 
-# Controller (控制端)
-npx ts-node src/index.ts controller
-ctrl> connect <agent-id>
-ctrl> view
-# 打开 http://localhost:8080
+# 或者从源码运行
+npm install
+npm start
 ```
 
-### 打包成 exe
+### 使用
 
-```powershell
+```
+# 两台机器都运行 xdesk
+
+# 机器 A
+xdesk> connect <机器B的ID>
+# 自动显示对方屏幕
+
+# 机器 B  
+xdesk> connect <机器A的ID>
+# 也可以看到机器 A 的屏幕
+```
+
+### 命令
+
+| 命令 | 说明 |
+|------|------|
+| `connect <id>` | 连接对端（自动请求屏幕） |
+| `peers` | 查看在线列表 |
+| `share` | 分享你的屏幕 |
+| `stop` | 停止分享 |
+| `quit` | 退出程序 |
+
+## 从源码构建
+
+### 安装依赖
+
+```bash
+git clone https://github.com/ctoox/xdesk.git
+cd xdesk
+npm install
+```
+
+### 运行
+
+```bash
+npm start
+```
+
+### 打包
+
+```bash
+# 编译 TypeScript
 npm run build
-npm run package
 
-# 生成 xdesk.exe，可直接分发
+# 打包成可执行文件
+npm run package
+```
+
+## GitHub Actions 自动构建
+
+推送到 GitHub 后，Actions 会自动构建多平台版本：
+
+- Windows x64
+- Linux x64
+- macOS x64
+- macOS ARM64
+
+### 手动触发构建
+
+1. 进入 GitHub 仓库页面
+2. 点击 Actions 标签
+3. 选择 "Build and Release"
+4. 点击 "Run workflow"
+
+### 发布新版本
+
+```bash
+# 创建标签
+git tag v1.0.0
+git push origin v1.0.0
+
+# Actions 会自动构建并创建 Release
 ```
 
 ## 架构
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Cloudflare Workers                        │
-│                    (信令服务器)                               │
-└─────────────────────────────────────────────────────────────┘
-         │                              │
-         │ WebSocket                    │ WebSocket
-         │                              │
-    ┌────┴────┐                   ┌────┴────┐
-    │  Agent  │                   │Controller│
-    │ (被控端) │                   │ (控制端) │
-    │         │                   │         │
-    │ ffmpeg  │                   │ 浏览器   │
-    │ 捕获屏幕 │                   │ 显示画面  │
-    │         │                   │ Shell    │
-    └─────────┘                   └─────────┘
+┌─────────────────────────────────────────┐
+│         Cloudflare Workers              │
+│         (信令服务器)                     │
+└─────────────────────────────────────────┘
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+   ┌────┴────┐            ┌────┴────┐
+   │ Client A │            │ Client B │
+   │         │            │         │
+   │ ffmpeg  │ ←WebSocket→ │ ffmpeg  │
+   │ 捕获屏幕 │            │ 捕获屏幕 │
+   │         │            │         │
+   │ 浏览器   │            │ 浏览器   │
+   │ 显示远程 │            │ 显示远程 │
+   └─────────┘            └─────────┘
 ```
+
+## 技术栈
+
+- **TypeScript** - 类型安全
+- **Node.js** - 运行时
+- **ffmpeg** - 屏幕捕获 + MJPEG 编码
+- **WebSocket** - 数据传输
+- **Cloudflare Workers** - 信令服务器
+
+## 性能
+
+| 指标 | 数值 |
+|------|------|
+| 帧率 | 60 FPS |
+| 分辨率 | 自动检测（支持 4K） |
+| 延迟 | ~100-150ms |
+| 编码 | MJPEG |
 
 ## 项目结构
 
@@ -115,111 +164,27 @@ xdesk/
 │   ├── index.ts          # 入口
 │   ├── client.ts         # WebSocket 客户端
 │   ├── message.ts        # 消息协议
-│   ├── ffmpeg-capture.ts # ffmpeg 屏幕捕获
+│   ├── ffmpeg-capture.ts # 屏幕捕获
 │   ├── shell.ts          # Shell 执行
-│   ├── viewer.ts         # HTTP 视图服务器
-│   └── types.d.ts        # 类型声明
+│   └── viewer.ts         # 浏览器视图
+├── .github/workflows/    # GitHub Actions
 ├── package.json
-├── tsconfig.json
 └── README.md
-```
-
-## 技术栈
-
-- **TypeScript** - 类型安全
-- **Node.js** - 运行时
-- **ffmpeg** - 屏幕捕获 + MJPEG 编码
-- **WebSocket** - 信令 + 数据传输
-- **Cloudflare Workers** - 信令服务器
-
-## 命令
-
-### Agent 命令
-
-```
-agent> stream    # 开始屏幕共享
-agent> stop      # 停止共享
-agent> quit      # 退出
-```
-
-### Controller 命令
-
-```
-ctrl> connect <id>  # 连接到 Agent
-ctrl> view          # 开始查看远程屏幕
-ctrl> quit          # 退出
-```
-
-### 浏览器功能
-
-- 实时屏幕显示
-- Shell 终端
-- FPS 和延迟监控
-
-## 配置
-
-### 环境变量
-
-```powershell
-# 代理设置（可选）
-$env:HTTP_PROXY = "http://127.0.0.1:7897"
-
-# Node.js 内存限制（可选）
-$env:NODE_OPTIONS = "--max-old-space-size=4096"
-```
-
-### ffmpeg 参数
-
-```typescript
-// 在 src/index.ts 中修改
-const capture = new FFmpegCapture(
-  0,      // 宽度（0 = 自动检测）
-  0,      // 高度（0 = 自动检测）
-  60,     // FPS
-  3       // 质量（1-31，越低越清晰）
-);
-```
-
-## 信令服务器
-
-部署在 Cloudflare Workers：
-
-```bash
-# 服务器代码
-cd xdesk-server
-wrangler deploy
 ```
 
 ## 开发路线
 
-### Phase 1 - 核心功能 ✅
-
 - [x] 屏幕共享（60 FPS）
 - [x] Shell 终端
 - [x] 自动重连
-- [x] 打包分发
-
-### Phase 2 - 增强功能
-
+- [x] 跨平台支持
 - [ ] 键鼠控制
-- [ ] 降低延迟（WebRTC）
-- [ ] 多显示器支持
+- [ ] WebRTC P2P（更低延迟）
+- [ ] 多显示器
 - [ ] 剪贴板同步
 - [ ] 文件传输
-
-### Phase 3 - 高级功能
-
 - [ ] 音频传输
-- [ ] 录屏功能
-- [ ] 多用户支持
-- [ ] 权限管理
-
-### Phase 4 - 平台扩展
-
-- [ ] GUI 桌面应用（Electron/Tauri）
-- [ ] Android 客户端
-- [ ] iOS 客户端
-- [ ] Web 客户端
+- [ ] GUI 界面
 
 ## 许可证
 

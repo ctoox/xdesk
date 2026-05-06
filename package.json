@@ -1,14 +1,16 @@
 {
-  "name": "xdesk-client",
+  "name": "xdesk",
   "version": "1.0.0",
-  "description": "Remote desktop client",
+  "description": "Lightweight remote desktop - 60fps, original quality",
   "main": "dist/index.js",
   "scripts": {
+    "start": "ts-node src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "agent": "node dist/index.js agent",
-    "controller": "node dist/index.js controller",
-    "package": "pkg dist/index.js --targets node18-win-x64 --output xdesk.exe"
+    "run": "node dist/index.js",
+    "package": "pkg dist/index.js --targets node20-win-x64 --output xdesk.exe",
+    "package:linux": "pkg dist/index.js --targets node20-linux-x64 --output xdesk-linux",
+    "package:mac": "pkg dist/index.js --targets node20-macos-x64 --output xdesk-mac",
+    "package:all": "npm run package && npm run package:linux && npm run package:mac"
   },
   "dependencies": {
     "ws": "^8.16.0",
@@ -16,12 +18,16 @@
   },
   "devDependencies": {
     "@types/ws": "^8.5.10",
+    "@types/node": "^20.0.0",
     "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
     "pkg": "^5.8.0"
   },
   "pkg": {
     "assets": [],
-    "targets": ["node18-win-x64"],
+    "targets": ["node20-win-x64", "node20-linux-x64", "node20-macos-x64"],
     "outputPath": "dist"
-  }
+  },
+  "keywords": ["remote-desktop", "screen-sharing", "remote-control"],
+  "license": "MIT"
 }
