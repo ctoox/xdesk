@@ -1,5 +1,45 @@
 const robot = require('robotjs');
 
+const KEY_MAP: { [key: string]: string } = {
+  'Enter': 'enter',
+  'Backspace': 'backspace',
+  'Tab': 'tab',
+  'Escape': 'escape',
+  'Delete': 'delete',
+  'Insert': 'insert',
+  'Home': 'home',
+  'End': 'end',
+  'PageUp': 'pageup',
+  'PageDown': 'pagedown',
+  'ArrowUp': 'up',
+  'ArrowDown': 'down',
+  'ArrowLeft': 'left',
+  'ArrowRight': 'right',
+  'Control': 'control',
+  'Shift': 'shift',
+  'Alt': 'alt',
+  'Meta': 'command',
+  'CapsLock': 'capslock',
+  'NumLock': 'numlock',
+  'ScrollLock': 'scrolllock',
+  'Pause': 'pause',
+  'PrintScreen': 'printscreen',
+  'ContextMenu': 'menu',
+  ' ': 'space',
+  'F1': 'f1',
+  'F2': 'f2',
+  'F3': 'f3',
+  'F4': 'f4',
+  'F5': 'f5',
+  'F6': 'f6',
+  'F7': 'f7',
+  'F8': 'f8',
+  'F9': 'f9',
+  'F10': 'f10',
+  'F11': 'f11',
+  'F12': 'f12',
+};
+
 export class InputController {
   private screenWidth: number;
   private screenHeight: number;
@@ -9,6 +49,16 @@ export class InputController {
     this.screenWidth = size.width;
     this.screenHeight = size.height;
     console.log(`Screen size: ${this.screenWidth}x${this.screenHeight}`);
+  }
+
+  private mapKey(key: string): string {
+    if (KEY_MAP[key]) {
+      return KEY_MAP[key];
+    }
+    if (key.length === 1) {
+      return key.toLowerCase();
+    }
+    return key.toLowerCase();
   }
 
   moveMouse(x: number, y: number): void {
@@ -55,7 +105,7 @@ export class InputController {
   scrollMouse(x: number, y: number, direction: 'up' | 'down'): void {
     try {
       robot.moveMouse(x, y);
-      robot.scrollMouse(0, direction === 'up' ? 5 : -5);
+      robot.scrollMouse(0, direction === 'up' ? 3 : -3);
     } catch (err) {
       console.error('Mouse scroll error:', err);
     }
@@ -63,29 +113,31 @@ export class InputController {
 
   keyPress(key: string, modifiers: string[] = []): void {
     try {
-      if (modifiers.length > 0) {
-        robot.keyTap(key, modifiers);
+      const mappedKey = this.mapKey(key);
+      const mappedModifiers = modifiers.map(m => this.mapKey(m));
+      if (mappedModifiers.length > 0) {
+        robot.keyTap(mappedKey, mappedModifiers);
       } else {
-        robot.keyTap(key);
+        robot.keyTap(mappedKey);
       }
     } catch (err) {
-      console.error('Key press error:', err);
+      console.error(`Key press error (${key}):`, err.message);
     }
   }
 
   keyDown(key: string): void {
     try {
-      robot.keyToggle(key, 'down');
+      robot.keyToggle(this.mapKey(key), 'down');
     } catch (err) {
-      console.error('Key down error:', err);
+      console.error(`Key down error (${key}):`, err.message);
     }
   }
 
   keyUp(key: string): void {
     try {
-      robot.keyToggle(key, 'up');
+      robot.keyToggle(this.mapKey(key), 'up');
     } catch (err) {
-      console.error('Key up error:', err);
+      console.error(`Key up error (${key}):`, err.message);
     }
   }
 
