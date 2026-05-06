@@ -22,41 +22,16 @@ export class FFmpegCapture {
     // Try AMD AMF hardware encoding first, fallback to MJPEG
     let args: string[];
     
-    // Check if AMD AMF is available
-    try {
-      const testArgs = [
-        '-f', 'gdigrab',
-        '-framerate', '1',
-        '-i', 'desktop',
-        '-c:v', 'h264_amf',
-        '-quality', 'speed',
-        '-f', 'null',
-        '-frames:v', '1',
-        '-'
-      ];
-      
-      args = [
-        '-f', 'gdigrab',
-        '-framerate', String(this.fps),
-        '-i', 'desktop',
-        '-c:v', 'h264_amf',
-        '-quality', 'speed',
-        '-f', 'mjpeg',
-        'pipe:1'
-      ];
-      console.log('[FFmpeg] Using AMD AMF hardware encoding');
-    } catch (e) {
-      args = [
-        '-f', 'gdigrab',
-        '-framerate', String(this.fps),
-        '-i', 'desktop',
-        '-c:v', 'mjpeg',
-        '-q:v', String(this.quality),
-        '-f', 'mjpeg',
-        'pipe:1'
-      ];
-      console.log('[FFmpeg] Using MJPEG software encoding');
-    }
+    args = [
+      '-f', 'gdigrab',
+      '-framerate', String(this.fps),
+      '-i', 'desktop',
+      '-c:v', 'mjpeg',
+      '-q:v', String(this.quality),
+      '-f', 'mjpeg',
+      'pipe:1'
+    ];
+    console.log('[FFmpeg] Using MJPEG encoding');
 
     // Find ffmpeg
     let ffmpegPath = 'ffmpeg';
