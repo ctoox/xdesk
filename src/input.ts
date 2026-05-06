@@ -18,13 +18,8 @@ const KEY_MAP: { [key: string]: string } = {
   'Control': 'control',
   'Shift': 'shift',
   'Alt': 'alt',
-  'Meta': 'command',
+  'Meta': 'win',
   'CapsLock': 'capslock',
-  'NumLock': 'numlock',
-  'ScrollLock': 'scrolllock',
-  'Pause': 'pause',
-  'PrintScreen': 'printscreen',
-  'ContextMenu': 'menu',
   ' ': 'space',
   'F1': 'f1',
   'F2': 'f2',
@@ -51,102 +46,93 @@ export class InputController {
     console.log(`Screen size: ${this.screenWidth}x${this.screenHeight}`);
   }
 
-  private mapKey(key: string): string {
+  private mapKey(key: string): string | null {
     if (KEY_MAP[key]) {
       return KEY_MAP[key];
     }
     if (key.length === 1) {
       return key.toLowerCase();
     }
-    return key.toLowerCase();
+    const lower = key.toLowerCase();
+    if (KEY_MAP[lower]) {
+      return KEY_MAP[lower];
+    }
+    return null;
   }
 
   moveMouse(x: number, y: number): void {
     try {
       robot.moveMouse(x, y);
-    } catch (err) {
-      console.error('Mouse move error:', err);
-    }
+    } catch (err) {}
   }
 
   mouseClick(x: number, y: number, button: 'left' | 'right' | 'middle' = 'left'): void {
     try {
       robot.moveMouse(x, y);
       robot.mouseClick(button);
-    } catch (err) {
-      console.error('Mouse click error:', err);
-    }
+    } catch (err) {}
   }
 
   mouseDown(button: 'left' | 'right' | 'middle' = 'left'): void {
     try {
       robot.mouseToggle('down', button);
-    } catch (err) {
-      console.error('Mouse down error:', err);
-    }
+    } catch (err) {}
   }
 
   mouseUp(button: 'left' | 'right' | 'middle' = 'left'): void {
     try {
       robot.mouseToggle('up', button);
-    } catch (err) {
-      console.error('Mouse up error:', err);
-    }
+    } catch (err) {}
   }
 
   mouseDrag(x: number, y: number): void {
     try {
       robot.dragMouse(x, y);
-    } catch (err) {
-      console.error('Mouse drag error:', err);
-    }
+    } catch (err) {}
   }
 
   scrollMouse(x: number, y: number, direction: 'up' | 'down'): void {
     try {
-      robot.moveMouse(x, y);
       robot.scrollMouse(0, direction === 'up' ? 3 : -3);
-    } catch (err) {
-      console.error('Mouse scroll error:', err);
-    }
+    } catch (err) {}
   }
 
   keyPress(key: string, modifiers: string[] = []): void {
     try {
       const mappedKey = this.mapKey(key);
-      const mappedModifiers = modifiers.map(m => this.mapKey(m));
+      if (!mappedKey) {
+        console.log(`Unknown key: ${key}`);
+        return;
+      }
+      const mappedModifiers = modifiers.map(m => this.mapKey(m)).filter(Boolean) as string[];
       if (mappedModifiers.length > 0) {
         robot.keyTap(mappedKey, mappedModifiers);
       } else {
         robot.keyTap(mappedKey);
       }
     } catch (err) {
-      console.error(`Key press error (${key}):`, err.message);
+      console.log(`Key error: ${key} -> ${this.mapKey(key)}`);
     }
   }
 
   keyDown(key: string): void {
     try {
-      robot.keyToggle(this.mapKey(key), 'down');
-    } catch (err) {
-      console.error(`Key down error (${key}):`, err.message);
-    }
+      const mappedKey = this.mapKey(key);
+      if (mappedKey) robot.keyToggle(mappedKey, 'down');
+    } catch (err) {}
   }
 
   keyUp(key: string): void {
     try {
-      robot.keyToggle(this.mapKey(key), 'up');
-    } catch (err) {
-      console.error(`Key up error (${key}):`, err.message);
-    }
+      const mappedKey = this.mapKey(key);
+      if (mappedKey) robot.keyToggle(mappedKey, 'up');
+    } catch (err) {}
   }
 
   typeText(text: string): void {
     try {
       robot.typeString(text);
-    } catch (err) {
-      console.error('Type text error:', err);
-    }
+    } catch (err) {}
   }
 
   getScreenSize(): { width: number; height: number } {
