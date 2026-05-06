@@ -8,8 +8,8 @@ export class RustCapture {
   private capturing: boolean = false;
 
   constructor(
-    private quality: number = 60,
-    private scale: number = 0.5
+    private quality: number = 70,
+    private scale: number = 0.75
   ) {}
 
   start(onFrame: (frame: Buffer) => void): void {
