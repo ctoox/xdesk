@@ -1,10 +1,9 @@
-import { RTCPeerConnection, RTCDataChannel } from 'werift';
+import { RTCPeerConnection } from 'werift';
 import { SignalClient } from './client';
-import { SignalMessage } from './message';
 
 export class WebRTCPeer {
-  private pc: RTCPeerConnection | null = null;
-  private dataChannel: RTCDataChannel | null = null;
+  private pc: any = null;
+  private dataChannel: any = null;
   private signalClient: SignalClient;
   private targetPeer: string | null = null;
   private onFrameCallback: ((frame: Buffer) => void) | null = null;
@@ -31,8 +30,8 @@ export class WebRTCPeer {
       }
     };
 
-    this.pc.ondatachannel = (channel: RTCDataChannel) => {
-      this.setupDataChannel(channel);
+    this.pc.ondatachannel = (e: any) => {
+      this.setupDataChannel(e.channel || e);
     };
 
     this.pc.onconnectionstatechange = () => {
@@ -56,10 +55,11 @@ export class WebRTCPeer {
     }
   }
 
-  private setupDataChannel(channel: RTCDataChannel): void {
+  private setupDataChannel(channel: any): void {
     channel.onmessage = (msg: any) => {
-      if (Buffer.isBuffer(msg) && this.onFrameCallback) {
-        this.onFrameCallback(msg);
+      const data = msg.data || msg;
+      if (Buffer.isBuffer(data) && this.onFrameCallback) {
+        this.onFrameCallback(data);
       }
     };
 
@@ -92,8 +92,8 @@ export class WebRTCPeer {
         }
       };
 
-      this.pc.ondatachannel = (channel: RTCDataChannel) => {
-        this.setupDataChannel(channel);
+      this.pc.ondatachannel = (e: any) => {
+        this.setupDataChannel(e.channel || e);
       };
 
       this.pc.onconnectionstatechange = () => {
