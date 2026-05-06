@@ -10,30 +10,28 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         include:
           - os: windows-latest
-            artifact_name: xdesk-windows-x64.exe
-            target: node18-win-x64
+            target: node20-win-x64
+            output: xdesk.exe
           - os: ubuntu-latest
-            artifact_name: xdesk-linux-x64
-            target: node18-linux-x64
-          - os: macos-13
-            artifact_name: xdesk-macos-x64
-            target: node18-macos-x64
-          - os: macos-14
-            artifact_name: xdesk-macos-arm64
-            target: node18-macos-arm64
+            target: node20-linux-x64
+            output: xdesk-linux
+          - os: macos-latest
+            target: node20-macos-x64
+            output: xdesk-mac
+          - os: macos-latest
+            target: node20-macos-arm64
+            output: xdesk-mac-arm64
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
@@ -41,43 +39,37 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
-      - name: Install pkg
-        run: npm install -g pkg
-
-      - name: Build executable
-        run: pkg dist/index.js --targets ${{ matrix.target }} --output ${{ matrix.artifact_name }}
-
-      - name: Make executable (Unix)
-        if: runner.os != 'Windows'
-        run: chmod +x ${{ matrix.artifact_name }}
+      - name: Package for ${{ matrix.target }}
+        run: npm run package
+        env:
+          PKG_TARGET: ${{ matrix.target }}
+          PKG_OUTPUT: ${{ matrix.output }}
+        shell: bash
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}
-          path: ${{ matrix.artifact_name }}
+          name: ${{ matrix.output }}
+          path: ${{ matrix.output }}*
 
   release:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
-    
+
     steps:
-      - name: Download artifacts
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
-          files: |
-            artifacts/xdesk-windows-x64.exe/xdesk-windows-x64.exe
-            artifacts/xdesk-linux-x64/xdesk-linux-x64
-            artifacts/xdesk-macos-x64/xdesk-macos-x64
-            artifacts/xdesk-macos-arm64/xdesk-macos-arm64
+          files: artifacts/**/*
           draft: false
           prerelease: false
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
