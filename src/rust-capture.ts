@@ -7,7 +7,10 @@ export class RustCapture {
   private onFrameCallback: ((frame: Buffer) => void) | null = null;
   private capturing: boolean = false;
 
-  constructor(private quality: number = 70) {}
+  constructor(
+    private quality: number = 50,
+    private maxWidth: number = 1920
+  ) {}
 
   start(onFrame: (frame: Buffer) => void): void {
     if (this.capturing) return;
@@ -17,7 +20,7 @@ export class RustCapture {
     
     const exePath = path.join(__dirname, '..', 'capture-rs', 'target', 'release', 'xdesk-capture.exe');
     
-    this.process = spawn(exePath, [this.quality.toString()], {
+    this.process = spawn(exePath, [this.quality.toString(), this.maxWidth.toString()], {
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
