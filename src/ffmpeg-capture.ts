@@ -1,17 +1,44 @@
 import { spawn, ChildProcess } from 'child_process';
+import { execSync } from 'child_process';
 
 export class FFmpegCapture {
   private process: ChildProcess | null = null;
   private onFrameCallback: ((frame: Buffer) => void) | null = null;
   private capturing: boolean = false;
   private frameBuffer: Buffer = Buffer.alloc(0);
+  private width: number;
+  private height: number;
 
   constructor(
-    private width: number = 3440,
-    private height: number = 1440,
-    private fps: number = 30,
-    private quality: number = 5
-  ) {}
+    width: number = 0,
+    height: number = 0,
+    private fps: number = 60,
+    private quality: number = 3
+  ) {
+    // Auto-detect screen resolution if not specified
+    if (width === 0 || height === 0) {
+      const res = this.getScreenResolution();
+      this.width = res.width;
+      this.height = res.height;
+    } else {
+      this.width = width;
+      this.height = height;
+    }
+  }
+
+  private getScreenResolution(): { width: number; height: number } {
+    try {
+      // Windows: use wmic
+      const result = execSync('wmic path Win32_VideoController get CurrentHorizontalResolution,CurrentVerticalResolution /value', { encoding: 'utf8' });
+      const lines = result.split('\n').filter(l => l.includes('='));
+      const width = parseInt(lines[0]?.split('=')[1]) || 1920;
+      const height = parseInt(lines[1]?.split('=')[1]) || 1080;
+      return { width, height };
+    } catch (e) {
+      // Fallback
+      return { width: 1920, height: 1080 };
+    }
+  }
 
   start(onFrame: (frame: Buffer) => void): void {
     if (this.capturing) return;
@@ -19,19 +46,16 @@ export class FFmpegCapture {
     this.onFrameCallback = onFrame;
     this.frameBuffer = Buffer.alloc(0);
 
-    // Try AMD AMF hardware encoding first, fallback to MJPEG
-    let args: string[];
-    
-    args = [
+    const args = [
       '-f', 'gdigrab',
       '-framerate', String(this.fps),
+      '-video_size', `${this.width}x${this.height}`,
       '-i', 'desktop',
       '-c:v', 'mjpeg',
       '-q:v', String(this.quality),
       '-f', 'mjpeg',
       'pipe:1'
     ];
-    console.log('[FFmpeg] Using MJPEG encoding');
 
     // Find ffmpeg
     let ffmpegPath = 'ffmpeg';
@@ -50,7 +74,7 @@ export class FFmpegCapture {
     }
 
     console.log(`[FFmpeg] Using: ${ffmpegPath}`);
-    console.log(`[FFmpeg] Capture: ${this.width}x${this.height} @ ${this.fps}fps`);
+    console.log(`[FFmpeg] Capture: ${this.width}x${this.height} @ ${this.fps}fps, quality ${this.quality}`);
 
     this.process = spawn(ffmpegPath, args, {
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -81,7 +105,6 @@ export class FFmpegCapture {
   }
 
   private extractFrames(): void {
-    // Find JPEG frames (FF D8 ... FF D9)
     while (true) {
       const start = this.frameBuffer.indexOf(Buffer.from([0xFF, 0xD8]));
       if (start === -1) {
@@ -114,5 +137,9 @@ export class FFmpegCapture {
 
   isCapturing(): boolean {
     return this.capturing;
+  }
+
+  getResolution(): { width: number; height: number } {
+    return { width: this.width, height: this.height };
   }
 }
