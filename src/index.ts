@@ -53,12 +53,12 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         if (targetPeer) {
           console.log(`[SCREEN] Request from ${targetPeer}`);
           capture.start((frame) => {
-            // Send as base64 JSON
-            client.send({
-              type: 'screen',
-              to: targetPeer,
-              data: { frame: frame.toString('base64') }
-            });
+            // Binary format: 36 bytes target ID + JPEG data
+            const targetBytes = Buffer.alloc(36);
+            targetBytes.write(targetPeer, 0, 36);
+            const packet = Buffer.concat([targetBytes, frame]);
+            client.sendBinary(packet);
+            
             frameCount++;
             const now = Date.now();
             if (now - lastFpsTime >= 1000) {
@@ -99,11 +99,11 @@ async function runAgent(proxyUrl?: string): Promise<void> {
       console.log('Starting stream...');
       capture.start((frame) => {
         if (!targetPeer) return;
-        client.send({
-          type: 'screen',
-          to: targetPeer,
-          data: { frame: frame.toString('base64') }
-        });
+        // Binary format: 36 bytes target ID + JPEG data
+        const targetBytes = Buffer.alloc(36);
+        targetBytes.write(targetPeer, 0, 36);
+        client.sendBinary(Buffer.concat([targetBytes, frame]));
+        
         frameCount++;
         const now = Date.now();
         if (now - lastFpsTime >= 1000) {
@@ -162,26 +162,31 @@ async function runController(proxyUrl?: string): Promise<void> {
     client.send({ type: 'shell', to: targetPeer, data: { command } });
   });
 
-  client.onMessage((msg: SignalMessage) => {
-    if (msg.type === 'screen' && msg.data?.frame) {
-      if (!viewerStarted) {
-        viewer.start();
-        viewerStarted = true;
-        console.log('Screen viewer: http://localhost:8080');
-        console.log('');
-      }
-      
-      viewer.updateFrame(msg.data.frame);
-      
-      frameCount++;
-      const now = Date.now();
-      if (now - lastFpsTime >= 1000) {
-        currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
-        frameCount = 0;
-        lastFpsTime = now;
-        process.stdout.write(`\r[FPS: ${currentFps}] `);
-      }
+  client.onFrame((data: Buffer) => {
+    if (!viewerStarted) {
+      viewer.start();
+      viewerStarted = true;
+      console.log('Screen viewer: http://localhost:8080');
+      console.log('');
     }
+    
+    // Binary format: 36 bytes sender ID + JPEG data
+    const senderId = data.slice(0, 36).toString('utf8').replace(/\0/g, '');
+    const frame = data.slice(36);
+    
+    viewer.updateFrame(frame.toString('base64'));
+    
+    frameCount++;
+    const now = Date.now();
+    if (now - lastFpsTime >= 1000) {
+      currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+      frameCount = 0;
+      lastFpsTime = now;
+      process.stdout.write(`\r[FPS: ${currentFps}] `);
+    }
+  });
+
+  client.onMessage((msg: SignalMessage) => {
     if (msg.type === 'shell-output' && msg.data?.output) {
       viewer.appendShellOutput(msg.data.output);
     }
