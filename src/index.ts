@@ -3,7 +3,7 @@ import { SignalClient } from './client';
 import { SignalMessage } from './message';
 import { ScreenViewer } from './viewer';
 import { executeCommand } from './shell';
-import { RustCapture } from './rust-capture';
+import { FFmpegCapture } from './ffmpeg-capture';
 import { WebRTCPeer } from './webrtc';
 
 const SIGNAL_URL = 'wss://xdesk.ctoocn.workers.dev/ws?room=test';
@@ -21,7 +21,7 @@ function prompt(prefix: string): Promise<string> {
 
 async function runAgent(proxyUrl?: string): Promise<void> {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
-  const capture = new RustCapture(80);
+  const capture = new FFmpegCapture(3440, 1440, 30);
   const webrtc = new WebRTCPeer(client);
   
   try {
