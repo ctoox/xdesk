@@ -1,4 +1,4 @@
-import { RTCPeerConnection, RTCDataChannel, MediaStream } from 'werift';
+import { RTCPeerConnection, RTCDataChannel } from 'werift';
 import { SignalClient } from './client';
 import { SignalMessage } from './message';
 
@@ -18,36 +18,32 @@ export class WebRTCPeer {
     this.targetPeer = targetPeer;
     
     this.pc = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     });
 
-    this.pc.onIceCandidate.subscribe((candidate) => {
-      if (this.targetPeer) {
+    this.pc.onicecandidate = (candidate: any) => {
+      if (this.targetPeer && candidate) {
         this.signalClient.send({
           type: 'ice',
           to: this.targetPeer,
-          data: { candidate: candidate.toJSON() }
+          data: { candidate }
         });
       }
-    });
+    };
 
-    this.pc.onDataChannel.subscribe((channel) => {
+    this.pc.ondatachannel = (channel: RTCDataChannel) => {
       this.setupDataChannel(channel);
-    });
+    };
 
-    this.pc.onConnectionStateChange.subscribe((state) => {
-      console.log(`[WebRTC] Connection state: ${state}`);
+    this.pc.onconnectionstatechange = () => {
+      const state = this.pc?.connectionState;
+      console.log(`[WebRTC] State: ${state}`);
       this.connected = state === 'connected';
-    });
+    };
 
-    // Create data channel for screen frames
     this.dataChannel = this.pc.createDataChannel('screen');
     this.setupDataChannel(this.dataChannel);
 
-    // Create offer
     const offer = await this.pc.createOffer();
     await this.pc.setLocalDescription(offer);
 
@@ -61,21 +57,21 @@ export class WebRTCPeer {
   }
 
   private setupDataChannel(channel: RTCDataChannel): void {
-    channel.onMessage.subscribe((msg) => {
-      if (msg instanceof Buffer && this.onFrameCallback) {
+    channel.onmessage = (msg: any) => {
+      if (Buffer.isBuffer(msg) && this.onFrameCallback) {
         this.onFrameCallback(msg);
       }
-    });
+    };
 
-    channel.onOpen.subscribe(() => {
+    channel.onopen = () => {
       console.log('[WebRTC] Data channel opened');
       this.connected = true;
-    });
+    };
 
-    channel.onClose.subscribe(() => {
+    channel.onclose = () => {
       console.log('[WebRTC] Data channel closed');
       this.connected = false;
-    });
+    };
   }
 
   async handleOffer(offer: any, fromPeer: string): Promise<void> {
@@ -83,30 +79,28 @@ export class WebRTCPeer {
     
     if (!this.pc) {
       this.pc = new RTCPeerConnection({
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
       });
 
-      this.pc.onIceCandidate.subscribe((candidate) => {
-        if (this.targetPeer) {
+      this.pc.onicecandidate = (candidate: any) => {
+        if (this.targetPeer && candidate) {
           this.signalClient.send({
             type: 'ice',
             to: this.targetPeer,
-            data: { candidate: candidate.toJSON() }
+            data: { candidate }
           });
         }
-      });
+      };
 
-      this.pc.onDataChannel.subscribe((channel) => {
+      this.pc.ondatachannel = (channel: RTCDataChannel) => {
         this.setupDataChannel(channel);
-      });
+      };
 
-      this.pc.onConnectionStateChange.subscribe((state) => {
-        console.log(`[WebRTC] Connection state: ${state}`);
+      this.pc.onconnectionstatechange = () => {
+        const state = this.pc?.connectionState;
+        console.log(`[WebRTC] State: ${state}`);
         this.connected = state === 'connected';
-      });
+      };
     }
 
     await this.pc.setRemoteDescription(offer);
@@ -151,12 +145,8 @@ export class WebRTCPeer {
   }
 
   close(): void {
-    if (this.dataChannel) {
-      this.dataChannel.close();
-    }
-    if (this.pc) {
-      this.pc.close();
-    }
+    if (this.dataChannel) this.dataChannel.close();
+    if (this.pc) this.pc.close();
     this.connected = false;
   }
 }
