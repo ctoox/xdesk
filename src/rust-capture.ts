@@ -5,7 +5,7 @@ export class RustCapture {
   private process: ChildProcess | null = null;
   private buffer: Buffer = Buffer.alloc(0);
   private onFrameCallback: ((frame: Buffer) => void) | null = null;
-  private frameResolve: ((frame: Buffer) => void) | null = null;
+  private capturing: boolean = false;
 
   constructor(
     private quality: number = 60,
@@ -13,7 +13,10 @@ export class RustCapture {
   ) {}
 
   start(onFrame: (frame: Buffer) => void): void {
+    if (this.capturing) return;
+    this.capturing = true;
     this.onFrameCallback = onFrame;
+    this.buffer = Buffer.alloc(0);
     
     const exePath = path.join(__dirname, '..', 'capture-rs', 'target', 'release', 'xdesk-capture.exe');
     
@@ -32,10 +35,16 @@ export class RustCapture {
 
     this.process.on('close', () => {
       console.log('[RUST] Process exited');
+      this.capturing = false;
+    });
+
+    this.process.on('error', (err) => {
+      console.error('[RUST] Error:', err.message);
+      this.capturing = false;
     });
 
     // Start capture loop
-    this.captureLoop();
+    setTimeout(() => this.captureLoop(), 100);
   }
 
   private processBuffer(): void {
@@ -45,7 +54,7 @@ export class RustCapture {
         const frame = this.buffer.slice(4, 4 + frameLen);
         this.buffer = this.buffer.slice(4 + frameLen);
         
-        if (this.onFrameCallback) {
+        if (this.onFrameCallback && frame.length > 0) {
           this.onFrameCallback(frame);
         }
       } else {
@@ -55,37 +64,29 @@ export class RustCapture {
   }
 
   private captureLoop(): void {
-    if (!this.process || this.process.killed) return;
+    if (!this.process || !this.capturing) return;
     
-    // Send capture command
-    this.process.stdin?.write(Buffer.from([1]));
+    try {
+      // Send capture command (1 byte)
+      this.process.stdin?.write(Buffer.from([1]));
+    } catch (e) {
+      console.error('[RUST] Write error:', e);
+      this.capturing = false;
+      return;
+    }
     
-    // Schedule next capture (30fps = ~33ms)
+    // Schedule next capture (~30fps)
     setTimeout(() => this.captureLoop(), 33);
   }
 
   stop(): void {
+    this.capturing = false;
     if (this.process) {
-      this.process.stdin?.write(Buffer.from([0]));
+      try {
+        this.process.stdin?.write(Buffer.from([0]));
+      } catch (e) {}
       this.process.kill();
       this.process = null;
-    }
-  }
-
-  setQuality(q: number): void {
-    this.quality = q;
-    if (this.process) {
-      this.process.stdin?.write(Buffer.from([2, q]));
-    }
-  }
-
-  setScale(s: number): void {
-    this.scale = s;
-    if (this.process) {
-      const buf = Buffer.alloc(5);
-      buf.writeUInt8(3, 0);
-      buf.writeFloatBE(s, 1);
-      this.process.stdin?.write(buf);
     }
   }
 }

@@ -1,4 +1,4 @@
-use std::io::{self, Read, Write};
+use std::io::{self, Read, Write, BufWriter};
 use windows::Win32::Graphics::Gdi::*;
 use windows::Win32::Foundation::*;
 use image::{ImageBuffer, Rgb, codecs::jpeg::JpegEncoder};
@@ -30,7 +30,7 @@ impl ScreenCapture {
             let mem_dc = CreateCompatibleDC(hdc);
             let bmp = CreateCompatibleBitmap(hdc, width, height);
             SelectObject(mem_dc, bmp);
-
+            eprintln!("Screen: {}x{}", width, height);
             ScreenCapture { hdc, mem_dc, bmp, width, height, quality, scale }
         }
     }
@@ -52,7 +52,8 @@ impl ScreenCapture {
                 bmiColors: [RGBQUAD::default(); 1],
             };
 
-            let mut raw_buf = vec![0u8; (self.width * self.height * 4) as usize];
+            let buf_size = (self.width * self.height * 4) as usize;
+            let mut raw_buf = vec![0u8; buf_size];
             GetDIBits(self.mem_dc, self.bmp, 0, self.height as u32,
                 Some(raw_buf.as_mut_ptr() as *mut _), &mut bmp_info, DIB_RGB_COLORS);
 
@@ -98,30 +99,29 @@ fn main() {
     let scale = args.get(2).and_then(|s| s.parse::<f32>().ok()).unwrap_or(0.5);
 
     let mut capture = ScreenCapture::new(quality, scale);
-    eprintln!("Capture: {:.0}x{:.0}, q={}, s={}", 
-        capture.width as f32 * scale, capture.height as f32 * scale, quality, scale);
+    eprintln!("Capture ready: q={}, s={}", quality, scale);
 
-    let stdin = io::stdin();
-    let stdout = io::stdout();
-    let mut stdout = stdout.lock();
+    let mut stdin = io::stdin();
+    let mut stdout = BufWriter::new(io::stdout());
 
+    let mut cmd_buf = [0u8; 1];
     loop {
-        let mut cmd = [0u8; 1];
-        if stdin.lock().read(&mut cmd).is_err() || cmd[0] == 0 {
-            break;
-        }
-
-        if cmd[0] == 1 {
-            let jpeg = capture.capture();
-            let len = jpeg.len() as u32;
-            let _ = stdout.write_all(&len.to_be_bytes());
-            let _ = stdout.write_all(&jpeg);
-            let _ = stdout.flush();
-        } else if cmd[0] == 2 {
-            let mut buf = [0u8; 1];
-            if stdin.lock().read(&mut buf).is_ok() {
-                capture.quality = buf[0];
+        match stdin.read(&mut cmd_buf) {
+            Ok(0) => break,
+            Ok(_) => {
+                match cmd_buf[0] {
+                    1 => {
+                        let jpeg = capture.capture();
+                        let len = jpeg.len() as u32;
+                        let _ = stdout.write_all(&len.to_be_bytes());
+                        let _ = stdout.write_all(&jpeg);
+                        let _ = stdout.flush();
+                    }
+                    0 => break,
+                    _ => {}
+                }
             }
+            Err(_) => break,
         }
     }
 }
