@@ -3,6 +3,7 @@ import { SignalClient } from './client';
 import { SignalMessage } from './message';
 import { ScreenCapture } from './capture';
 import { InputController } from './input';
+import { ScreenViewer } from './viewer';
 
 const SIGNAL_URL = 'wss://xdesk.ctoocn.workers.dev/ws?room=test';
 
@@ -45,6 +46,10 @@ async function runAgent(proxyUrl?: string): Promise<void> {
   const screenSize = input.getScreenSize();
   console.log(`Screen: ${screenSize.width}x${screenSize.height}`);
 
+  let frameCount = 0;
+  let lastFpsTime = Date.now();
+  let currentFps = 0;
+
   client.onMessage((msg: SignalMessage) => {
     switch (msg.type) {
       case 'screen-request':
@@ -59,6 +64,15 @@ async function runAgent(proxyUrl?: string): Promise<void> {
               to: target,
               data: { frame, timestamp: Date.now() }
             });
+            frameCount++;
+            
+            const now = Date.now();
+            if (now - lastFpsTime >= 1000) {
+              currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+              frameCount = 0;
+              lastFpsTime = now;
+              process.stdout.write(`\r[FPS: ${currentFps}] `);
+            }
           });
         }
         break;
@@ -130,8 +144,8 @@ async function runAgent(proxyUrl?: string): Promise<void> {
   console.log('');
 
   while (true) {
-    const input = await prompt('agent');
-    const parts = input.trim().split(/\s+/);
+    const inputCmd = await prompt('agent');
+    const parts = inputCmd.trim().split(/\s+/);
     
     if (parts[0] === 'quit' || parts[0] === 'exit') break;
     
@@ -172,10 +186,20 @@ async function runAgent(proxyUrl?: string): Promise<void> {
               data: { frame, timestamp: Date.now() }
             });
           });
+          frameCount++;
+          
+          const now = Date.now();
+          if (now - lastFpsTime >= 1000) {
+            currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+            frameCount = 0;
+            lastFpsTime = now;
+            process.stdout.write(`\r[FPS: ${currentFps}] `);
+          }
         });
         break;
       case 'stop':
         capture.stopCapture();
+        console.log('');
         break;
       case 'fps':
         if (parts[1]) capture.setFps(parseInt(parts[1]));
@@ -190,7 +214,7 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         else console.log(`Current scale: ${capture.getStats().scale}`);
         break;
       default:
-        if (input.trim()) console.log('Unknown command');
+        if (inputCmd.trim()) console.log('Unknown command');
     }
   }
 
@@ -201,6 +225,8 @@ async function runAgent(proxyUrl?: string): Promise<void> {
 
 async function runController(proxyUrl?: string): Promise<void> {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
+  const viewer = new ScreenViewer(8080);
+  let viewerStarted = false;
   
   try {
     await client.connect();
@@ -222,15 +248,29 @@ async function runController(proxyUrl?: string): Promise<void> {
   }
 
   let targetPeer: string | null = null;
-  let viewerStarted = false;
+  let frameCount = 0;
+  let lastFpsTime = Date.now();
+  let currentFps = 0;
 
   client.onMessage((msg: SignalMessage) => {
     if (msg.type === 'screen' && msg.data?.frame) {
       if (!viewerStarted) {
-        // Start viewer on first frame
-        console.log('Starting screen viewer...');
-        console.log('Open http://localhost:8080 in your browser');
+        viewer.start();
         viewerStarted = true;
+        console.log('Screen viewer started at http://localhost:8080');
+        console.log('Open this URL in your browser to view remote screen');
+        console.log('');
+      }
+      
+      viewer.updateFrame(msg.data.frame);
+      frameCount++;
+      
+      const now = Date.now();
+      if (now - lastFpsTime >= 1000) {
+        currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+        frameCount = 0;
+        lastFpsTime = now;
+        process.stdout.write(`\r[FPS: ${currentFps}] `);
       }
     }
   });
@@ -279,16 +319,6 @@ async function runController(proxyUrl?: string): Promise<void> {
             type: 'screen-request',
             to: targetPeer,
             data: { fps: 20 }
-          });
-          // Start viewer
-          const { ScreenViewer } = require('./viewer');
-          const viewer = new ScreenViewer(8080);
-          viewer.start();
-          
-          client.onMessage((msg: SignalMessage) => {
-            if (msg.type === 'screen' && msg.data?.frame) {
-              viewer.updateFrame(msg.data.frame);
-            }
           });
         }
         break;
@@ -341,6 +371,9 @@ async function runController(proxyUrl?: string): Promise<void> {
     }
   }
 
+  if (viewerStarted) {
+    viewer.stop();
+  }
   client.disconnect();
   rl.close();
 }
