@@ -10,20 +10,21 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
             artifact_name: xdesk-windows-x64.exe
-            asset_name: xdesk-windows-x64.exe
+            target: node20-win-x64
           - os: ubuntu-latest
             artifact_name: xdesk-linux-x64
-            asset_name: xdesk-linux-x64
-          - os: macos-latest
+            target: node20-linux-x64
+          - os: macos-13
             artifact_name: xdesk-macos-x64
-            asset_name: xdesk-macos-x64
-          - os: macos-latest
+            target: node20-macos-x64
+          - os: macos-14
             artifact_name: xdesk-macos-arm64
-            asset_name: xdesk-macos-arm64
+            target: node20-macos-arm64
 
     steps:
       - name: Checkout code
@@ -33,7 +34,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
@@ -44,29 +44,12 @@ jobs:
       - name: Install pkg
         run: npm install -g pkg
 
-      - name: Build executable (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          pkg dist/index.js --targets node20-win-x64 --output xdesk-windows-x64.exe
-        shell: bash
+      - name: Build executable
+        run: pkg dist/index.js --targets ${{ matrix.target }} --output ${{ matrix.artifact_name }}
 
-      - name: Build executable (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          pkg dist/index.js --targets node20-linux-x64 --output xdesk-linux-x64
-          chmod +x xdesk-linux-x64
-
-      - name: Build executable (macOS x64)
-        if: matrix.os == 'macos-latest' && matrix.artifact_name == 'xdesk-macos-x64'
-        run: |
-          pkg dist/index.js --targets node20-macos-x64 --output xdesk-macos-x64
-          chmod +x xdesk-macos-x64
-
-      - name: Build executable (macOS ARM64)
-        if: matrix.os == 'macos-latest' && matrix.artifact_name == 'xdesk-macos-arm64'
-        run: |
-          pkg dist/index.js --targets node20-macos-arm64 --output xdesk-macos-arm64
-          chmod +x xdesk-macos-arm64
+      - name: Make executable (Unix)
+        if: runner.os != 'Windows'
+        run: chmod +x ${{ matrix.artifact_name }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -86,10 +69,10 @@ jobs:
           path: artifacts
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/xdesk-windows-x64/xdesk-windows-x64.exe
+            artifacts/xdesk-windows-x64.exe/xdesk-windows-x64.exe
             artifacts/xdesk-linux-x64/xdesk-linux-x64
             artifacts/xdesk-macos-x64/xdesk-macos-x64
             artifacts/xdesk-macos-arm64/xdesk-macos-arm64
