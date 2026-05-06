@@ -19,12 +19,9 @@ jobs:
           - os: ubuntu-latest
             artifact_name: xdesk-linux-x64
             target: node18-linux-x64
-          - os: macos-13
-            artifact_name: xdesk-macos-x64
+          - os: macos-latest
+            artifact_name: xdesk-macos
             target: node18-macos-x64
-          - os: macos-14
-            artifact_name: xdesk-macos-arm64
-            target: node18-macos-arm64
 
     steps:
       - name: Checkout code
@@ -74,8 +71,7 @@ jobs:
           files: |
             artifacts/xdesk-windows-x64.exe/xdesk-windows-x64.exe
             artifacts/xdesk-linux-x64/xdesk-linux-x64
-            artifacts/xdesk-macos-x64/xdesk-macos-x64
-            artifacts/xdesk-macos-arm64/xdesk-macos-arm64
+            artifacts/xdesk-macos/xdesk-macos
           draft: false
           prerelease: false
           generate_release_notes: true
