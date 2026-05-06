@@ -15,7 +15,6 @@ export class FFmpegCapture {
     private fps: number = 60,
     private quality: number = 3
   ) {
-    // Auto-detect screen resolution if not specified
     if (width === 0 || height === 0) {
       const res = this.getScreenResolution();
       this.width = res.width;
@@ -28,15 +27,29 @@ export class FFmpegCapture {
 
   private getScreenResolution(): { width: number; height: number } {
     try {
-      // Windows: use wmic
-      const result = execSync('wmic path Win32_VideoController get CurrentHorizontalResolution,CurrentVerticalResolution /value', { encoding: 'utf8' });
-      const lines = result.split('\n').filter(l => l.includes('='));
-      const width = parseInt(lines[0]?.split('=')[1]) || 1920;
-      const height = parseInt(lines[1]?.split('=')[1]) || 1080;
+      // Get real resolution (ignoring DPI scaling)
+      const result = execSync(
+        'powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width; [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height"',
+        { encoding: 'utf8' }
+      );
+      const lines = result.trim().split('\n');
+      const width = parseInt(lines[0]) || 1920;
+      const height = parseInt(lines[1]) || 1080;
       return { width, height };
     } catch (e) {
-      // Fallback
-      return { width: 1920, height: 1080 };
+      // Fallback: use wmic
+      try {
+        const result = execSync(
+          'wmic path Win32_VideoController get CurrentHorizontalResolution,CurrentVerticalResolution /value',
+          { encoding: 'utf8' }
+        );
+        const lines = result.split('\n').filter(l => l.includes('='));
+        const width = parseInt(lines[0]?.split('=')[1]) || 1920;
+        const height = parseInt(lines[1]?.split('=')[1]) || 1080;
+        return { width, height };
+      } catch (e2) {
+        return { width: 1920, height: 1080 };
+      }
     }
   }
 
@@ -46,10 +59,10 @@ export class FFmpegCapture {
     this.onFrameCallback = onFrame;
     this.frameBuffer = Buffer.alloc(0);
 
+    // Don't use -video_size, let ffmpeg capture full screen
     const args = [
       '-f', 'gdigrab',
       '-framerate', String(this.fps),
-      '-video_size', `${this.width}x${this.height}`,
       '-i', 'desktop',
       '-c:v', 'mjpeg',
       '-q:v', String(this.quality),
@@ -57,7 +70,6 @@ export class FFmpegCapture {
       'pipe:1'
     ];
 
-    // Find ffmpeg
     let ffmpegPath = 'ffmpeg';
     const paths = [
       'C:\\ffmpeg\\bin\\ffmpeg.exe',
@@ -87,10 +99,7 @@ export class FFmpegCapture {
     });
 
     this.process.stderr?.on('data', (data: Buffer) => {
-      const msg = data.toString();
-      if (msg.includes('Error') || msg.includes('error')) {
-        console.error(`[FFmpeg] ${msg.trim()}`);
-      }
+      // Ignore ffmpeg logs
     });
 
     this.process.on('close', (code) => {
