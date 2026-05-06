@@ -110,7 +110,7 @@ export class ScreenViewer {
     .toolbar span { color: #888; font-size: 11px; }
     .toolbar b { color: #4CAF50; }
     .view { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #111; }
-    #screen { max-width: 100%; max-height: 100%; object-fit: contain; }
+    #screen { width: 100%; height: 100%; object-fit: contain; }
     .sidebar { width: 300px; background: #1a1a1a; border-left: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
     .sidebar-h { padding: 6px 10px; background: #252525; color: #ccc; font-size: 11px; border-bottom: 1px solid #333; }
     #out { flex: 1; overflow-y: auto; padding: 6px; font-family: Consolas, monospace; font-size: 11px; color: #d4d4d4; white-space: pre-wrap; }
