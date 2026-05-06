@@ -65,7 +65,6 @@ async function runAgent(proxyUrl?: string): Promise<void> {
               data: { frame, timestamp: Date.now() }
             });
             frameCount++;
-            
             const now = Date.now();
             if (now - lastFpsTime >= 1000) {
               currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
@@ -81,25 +80,13 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         if (msg.data) {
           const { action, x, y, button, direction } = msg.data;
           switch (action) {
-            case 'move':
-              input.moveMouse(x, y);
-              break;
-            case 'click':
-              input.mouseClick(x, y, button || 'left');
-              break;
-            case 'down':
-              input.mouseDown(button || 'left');
-              break;
-            case 'up':
-              input.mouseUp(button || 'left');
-              break;
-            case 'drag':
-              input.mouseDrag(x, y);
-              break;
+            case 'move': input.moveMouse(x, y); break;
+            case 'click': input.mouseClick(x, y, button || 'left'); break;
+            case 'down': input.mouseDown(button || 'left'); break;
+            case 'up': input.mouseUp(button || 'left'); break;
+            case 'drag': input.mouseDrag(x, y); break;
             case 'scroll':
-              const scrollX = x || screenSize.width / 2;
-              const scrollY = y || screenSize.height / 2;
-              input.scrollMouse(scrollX, scrollY, direction || 'down');
+              input.scrollMouse(x || screenSize.width / 2, y || screenSize.height / 2, direction || 'down');
               break;
           }
         }
@@ -107,23 +94,13 @@ async function runAgent(proxyUrl?: string): Promise<void> {
         
       case 'key':
         if (msg.data) {
-          const { action, key, code, modifiers, text } = msg.data;
+          const { action, key, modifiers, text } = msg.data;
           switch (action) {
-            case 'press':
-              input.keyPress(key);
-              break;
-            case 'down':
-              input.keyDown(key);
-              break;
-            case 'up':
-              input.keyUp(key);
-              break;
-            case 'combo':
-              input.keyPress(key, modifiers || []);
-              break;
-            case 'type':
-              input.typeText(text || '');
-              break;
+            case 'press': input.keyPress(key); break;
+            case 'down': input.keyDown(key); break;
+            case 'up': input.keyUp(key); break;
+            case 'combo': input.keyPress(key, modifiers || []); break;
+            case 'type': input.typeText(text || ''); break;
           }
         }
         break;
@@ -152,42 +129,28 @@ async function runAgent(proxyUrl?: string): Promise<void> {
     switch (parts[0]) {
       case 'peers':
         const peers = client.getPeers();
-        if (peers.length === 0) {
-          console.log('No peers online');
-        } else {
-          peers.forEach(p => console.log(`  ${p}`));
-        }
+        if (peers.length === 0) console.log('No peers online');
+        else peers.forEach(p => console.log(`  ${p}`));
         break;
       case 'send':
-        if (parts.length < 3) {
-          console.log('Usage: send <id> <message>');
-        } else {
-          client.sendTest(parts[1], parts.slice(2).join(' '));
-          console.log(`Sent to ${parts[1]}`);
-        }
+        if (parts.length < 3) console.log('Usage: send <id> <message>');
+        else { client.sendTest(parts[1], parts.slice(2).join(' ')); console.log(`Sent to ${parts[1]}`); }
         break;
       case 'capture':
         try {
           console.log('Capturing screen...');
           const frame = await capture.captureOnce();
           console.log(`Captured! Size: ${Math.round(frame.length / 1024)} KB`);
-        } catch (e) {
-          console.error('Capture failed:', e);
-        }
+        } catch (e) { console.error('Capture failed:', e); }
         break;
       case 'stream':
         console.log('Starting screen stream...');
         capture.startCapture((frame) => {
           const peers = client.getPeers();
           peers.forEach(peer => {
-            client.send({
-              type: 'screen',
-              to: peer,
-              data: { frame, timestamp: Date.now() }
-            });
+            client.send({ type: 'screen', to: peer, data: { frame, timestamp: Date.now() } });
           });
           frameCount++;
-          
           const now = Date.now();
           if (now - lastFpsTime >= 1000) {
             currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
@@ -252,13 +215,24 @@ async function runController(proxyUrl?: string): Promise<void> {
   let lastFpsTime = Date.now();
   let currentFps = 0;
 
+  // Handle browser input events
+  viewer.setInputCallback((type, data) => {
+    if (!targetPeer) return;
+    
+    if (type === 'mouse') {
+      client.send({ type: 'mouse', to: targetPeer, data });
+    } else if (type === 'key') {
+      client.send({ type: 'key', to: targetPeer, data });
+    }
+  });
+
   client.onMessage((msg: SignalMessage) => {
     if (msg.type === 'screen' && msg.data?.frame) {
       if (!viewerStarted) {
         viewer.start();
         viewerStarted = true;
         console.log('Screen viewer started at http://localhost:8080');
-        console.log('Open this URL in your browser to view remote screen');
+        console.log('Open this URL in your browser to view and control remote screen');
         console.log('');
       }
       
@@ -279,10 +253,6 @@ async function runController(proxyUrl?: string): Promise<void> {
   console.log('  connect <id>       - Connect to agent');
   console.log('  peers              - List online peers');
   console.log('  view               - Start viewing remote screen');
-  console.log('  mouse <x> <y>      - Move mouse');
-  console.log('  click <x> <y>      - Click at position');
-  console.log('  key <key>          - Press key');
-  console.log('  type <text>        - Type text');
   console.log('  test <message>     - Send test message');
   console.log('  quit               - Exit');
   console.log('');
@@ -304,58 +274,15 @@ async function runController(proxyUrl?: string): Promise<void> {
         break;
       case 'peers':
         const peers = client.getPeers();
-        if (peers.length === 0) {
-          console.log('No peers online');
-        } else {
-          peers.forEach(p => console.log(`  ${p}`));
-        }
+        if (peers.length === 0) console.log('No peers online');
+        else peers.forEach(p => console.log(`  ${p}`));
         break;
       case 'view':
         if (!targetPeer) {
           console.log('No target. Use: connect <id>');
         } else {
           console.log(`Requesting screen from ${targetPeer}...`);
-          client.send({
-            type: 'screen-request',
-            to: targetPeer,
-            data: { fps: 20 }
-          });
-        }
-        break;
-      case 'mouse':
-        if (!targetPeer) {
-          console.log('No target. Use: connect <id>');
-        } else if (parts.length < 3) {
-          console.log('Usage: mouse <x> <y>');
-        } else {
-          client.sendMouseMove(targetPeer, parseInt(parts[1]), parseInt(parts[2]));
-        }
-        break;
-      case 'click':
-        if (!targetPeer) {
-          console.log('No target. Use: connect <id>');
-        } else if (parts.length < 3) {
-          console.log('Usage: click <x> <y>');
-        } else {
-          client.sendMouseClick(targetPeer, parseInt(parts[1]), parseInt(parts[2]));
-        }
-        break;
-      case 'key':
-        if (!targetPeer) {
-          console.log('No target. Use: connect <id>');
-        } else if (parts.length < 2) {
-          console.log('Usage: key <key>');
-        } else {
-          client.send({ type: 'key', to: targetPeer, data: { action: 'press', key: parts[1] } });
-        }
-        break;
-      case 'type':
-        if (!targetPeer) {
-          console.log('No target. Use: connect <id>');
-        } else if (parts.length < 2) {
-          console.log('Usage: type <text>');
-        } else {
-          client.send({ type: 'key', to: targetPeer, data: { action: 'type', text: parts.slice(1).join(' ') } });
+          client.send({ type: 'screen-request', to: targetPeer, data: { fps: 20 } });
         }
         break;
       case 'test':
@@ -371,9 +298,7 @@ async function runController(proxyUrl?: string): Promise<void> {
     }
   }
 
-  if (viewerStarted) {
-    viewer.stop();
-  }
+  if (viewerStarted) viewer.stop();
   client.disconnect();
   rl.close();
 }

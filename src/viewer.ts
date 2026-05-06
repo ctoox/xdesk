@@ -1,5 +1,7 @@
 import * as http from 'http';
 
+export type InputCallback = (type: string, data: any) => void;
+
 export class ScreenViewer {
   private server: http.Server | null = null;
   private port: number;
@@ -9,10 +11,14 @@ export class ScreenViewer {
   private startTime: number = 0;
   private lastFpsUpdate: number = 0;
   private currentFps: number = 0;
-  private frameBuffer: string[] = [];
+  private onInput: InputCallback | null = null;
 
   constructor(port: number = 8080) {
     this.port = port;
+  }
+
+  setInputCallback(callback: InputCallback): void {
+    this.onInput = callback;
   }
 
   start(): void {
@@ -40,18 +46,25 @@ export class ScreenViewer {
         req.on('close', () => {
           this.clients.delete(res);
         });
+      } else if (req.url === '/input' && req.method === 'POST') {
+        let body = '';
+        req.on('data', (chunk) => body += chunk);
+        req.on('end', () => {
+          try {
+            const input = JSON.parse(body);
+            if (this.onInput) {
+              this.onInput(input.type, input);
+            }
+          } catch (e) {}
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end('{"ok":true}');
+        });
       } else if (req.url === '/stats') {
         res.writeHead(200, {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         });
         res.end(JSON.stringify(this.getStats()));
-      } else if (req.url === '/frame') {
-        res.writeHead(200, {
-          'Content-Type': 'text/plain',
-          'Access-Control-Allow-Origin': '*'
-        });
-        res.end(this.currentFrame || '');
       } else {
         res.writeHead(404);
         res.end('Not found');
@@ -62,7 +75,6 @@ export class ScreenViewer {
       console.log(`Screen viewer started at http://localhost:${this.port}`);
     });
 
-    // Update FPS every second
     setInterval(() => {
       const now = Date.now();
       const elapsed = (now - this.lastFpsUpdate) / 1000;
@@ -87,11 +99,14 @@ export class ScreenViewer {
     }
   }
 
+  getCurrentFps(): number {
+    return this.currentFps;
+  }
+
   getStats(): any {
     const elapsed = (Date.now() - this.startTime) / 1000;
     return {
       clients: this.clients.size,
-      frames: this.frameCount,
       fps: this.currentFps,
       uptime: Math.round(elapsed)
     };
@@ -116,9 +131,8 @@ export class ScreenViewer {
       display: flex; 
       flex-direction: column;
       align-items: center; 
-      min-height: 100vh;
+      height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      padding: 10px;
       overflow: hidden;
     }
     .header {
@@ -126,24 +140,25 @@ export class ScreenViewer {
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      margin-bottom: 10px;
-      padding: 0 10px;
+      padding: 8px 15px;
+      background: #222;
+      flex-shrink: 0;
     }
     h1 {
       color: #fff;
-      font-size: 18px;
+      font-size: 16px;
     }
     .stats {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       align-items: center;
     }
     .stat {
       color: #888;
-      font-size: 13px;
-      background: #2a2a2a;
-      padding: 4px 10px;
-      border-radius: 4px;
+      font-size: 12px;
+      background: #333;
+      padding: 3px 8px;
+      border-radius: 3px;
     }
     .stat .value {
       color: #4CAF50;
@@ -151,41 +166,60 @@ export class ScreenViewer {
     }
     .controls {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
     }
     .btn {
-      background: #333;
+      background: #444;
       color: #fff;
       border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
+      padding: 4px 10px;
+      border-radius: 3px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
     }
-    .btn:hover { background: #444; }
-    .btn.active { background: #4CAF50; }
+    .btn:hover { background: #555; }
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .zoom-btn {
+      background: #444;
+      color: #fff;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .zoom-btn:hover { background: #555; }
+    .zoom-value {
+      color: #fff;
+      font-size: 12px;
+      min-width: 40px;
+      text-align: center;
+    }
     #screen-container {
-      position: relative;
-      width: 100%;
       flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      width: 100%;
+      position: relative;
     }
     #screen-wrapper {
       position: relative;
       transform-origin: center center;
-      transition: transform 0.2s ease;
     }
     #screen {
-      max-width: 100%;
-      max-height: calc(100vh - 80px);
-      border: 2px solid #333;
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
       display: block;
+      max-width: 100%;
+      max-height: calc(100vh - 45px);
+      user-select: none;
+      -webkit-user-drag: none;
     }
     #overlay {
       position: absolute;
@@ -197,51 +231,26 @@ export class ScreenViewer {
     }
     .status {
       position: fixed;
-      bottom: 10px;
+      bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
       color: #888;
-      font-size: 12px;
-      background: rgba(0,0,0,0.7);
-      padding: 4px 12px;
-      border-radius: 4px;
+      font-size: 11px;
+      background: rgba(0,0,0,0.8);
+      padding: 3px 10px;
+      border-radius: 3px;
+      z-index: 10;
     }
     .status.connected { color: #4CAF50; }
     .status.error { color: #f44336; }
-    .zoom-controls {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .zoom-btn {
-      background: #333;
-      color: #fff;
-      border: none;
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .zoom-btn:hover { background: #444; }
-    .zoom-value {
-      color: #fff;
-      font-size: 13px;
-      min-width: 45px;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>xdesk Remote Screen</h1>
+    <h1>xdesk</h1>
     <div class="stats">
       <div class="stat">FPS: <span class="value" id="fps">0</span></div>
       <div class="stat">延迟: <span class="value" id="latency">0</span>ms</div>
-      <div class="stat">客户端: <span class="value" id="clients">0</span></div>
     </div>
     <div class="controls">
       <div class="zoom-controls">
@@ -249,13 +258,12 @@ export class ScreenViewer {
         <span class="zoom-value" id="zoom">100%</span>
         <button class="zoom-btn" onclick="zoomIn()">+</button>
         <button class="btn" onclick="zoomFit()">适应</button>
-        <button class="btn" onclick="zoomReset()">100%</button>
       </div>
     </div>
   </div>
   <div id="screen-container">
     <div id="screen-wrapper">
-      <img id="screen" src="" alt="Waiting for screen..." />
+      <img id="screen" src="" alt="Waiting..." />
       <div id="overlay"></div>
     </div>
   </div>
@@ -267,7 +275,6 @@ export class ScreenViewer {
     const status = document.getElementById('status');
     const fpsDisplay = document.getElementById('fps');
     const latencyDisplay = document.getElementById('latency');
-    const clientsDisplay = document.getElementById('clients');
     const zoomDisplay = document.getElementById('zoom');
     const screenWrapper = document.getElementById('screen-wrapper');
     
@@ -275,9 +282,7 @@ export class ScreenViewer {
     let lastTime = Date.now();
     let lastFrameTime = Date.now();
     let currentZoom = 100;
-    let fps = 0;
     
-    // Zoom functions
     function zoomIn() {
       currentZoom = Math.min(200, currentZoom + 10);
       applyZoom();
@@ -290,155 +295,109 @@ export class ScreenViewer {
     
     function zoomFit() {
       const container = document.getElementById('screen-container');
-      const containerWidth = container.clientWidth - 20;
-      const containerHeight = container.clientHeight - 20;
-      const imgWidth = img.naturalWidth || 1920;
-      const imgHeight = img.naturalHeight || 1080;
-      
-      const scaleX = containerWidth / imgWidth;
-      const scaleY = containerHeight / imgHeight;
-      currentZoom = Math.round(Math.min(scaleX, scaleY) * 100);
-      applyZoom();
-    }
-    
-    function zoomReset() {
-      currentZoom = 100;
+      const cw = container.clientWidth - 10;
+      const ch = container.clientHeight - 10;
+      const iw = img.naturalWidth || 1920;
+      const ih = img.naturalHeight || 1080;
+      currentZoom = Math.round(Math.min(cw / iw, ch / ih) * 100);
       applyZoom();
     }
     
     function applyZoom() {
-      screenWrapper.style.transform = \`scale(\${currentZoom / 100})\`;
+      screenWrapper.style.transform = 'scale(' + (currentZoom / 100) + ')';
       zoomDisplay.textContent = currentZoom + '%';
     }
     
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        if (e.key === '=' || e.key === '+') {
-          e.preventDefault();
-          zoomIn();
-        } else if (e.key === '-') {
-          e.preventDefault();
-          zoomOut();
-        } else if (e.key === '0') {
-          e.preventDefault();
-          zoomReset();
-        }
-      }
-    });
-    
-    // Mouse wheel zoom
-    document.addEventListener('wheel', (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        if (e.deltaY < 0) {
-          zoomIn();
-        } else {
-          zoomOut();
-        }
-      }
-    }, { passive: false });
-    
-    function connect() {
-      const events = new EventSource('/stream');
-      
-      events.onopen = () => {
-        status.textContent = 'Connected';
-        status.className = 'status connected';
-      };
-      
-      events.onmessage = (e) => {
-        const now = Date.now();
-        const latency = now - lastFrameTime;
-        lastFrameTime = now;
-        
-        img.src = 'data:image/jpeg;base64,' + e.data;
-        frameCount++;
-        
-        // Update latency
-        latencyDisplay.textContent = Math.min(latency, 999);
-        
-        // Update FPS every second
-        if (now - lastTime >= 1000) {
-          fps = frameCount;
-          fpsDisplay.textContent = fps;
-          frameCount = 0;
-          lastTime = now;
-        }
-      };
-      
-      events.onerror = () => {
-        status.textContent = 'Disconnected, reconnecting...';
-        status.className = 'status error';
-        events.close();
-        setTimeout(connect, 2000);
-      };
+    function getCoords(e) {
+      const rect = overlay.getBoundingClientRect();
+      const iw = img.naturalWidth || 1920;
+      const ih = img.naturalHeight || 1080;
+      const displayW = rect.width * currentZoom / 100;
+      const displayH = rect.height * currentZoom / 100;
+      const x = Math.round((e.clientX - rect.left) / displayW * iw);
+      const y = Math.round((e.clientY - rect.top) / displayH * ih);
+      return { x: Math.max(0, Math.min(iw, x)), y: Math.max(0, Math.min(ih, y)) };
     }
     
-    // Fetch stats periodically
-    setInterval(async () => {
-      try {
-        const res = await fetch('/stats');
-        const stats = await res.json();
-        clientsDisplay.textContent = stats.clients;
-      } catch (e) {}
-    }, 2000);
+    function sendInput(data) {
+      fetch('/input', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).catch(() => {});
+    }
     
-    // Mouse events - convert coordinates based on zoom
+    // Mouse events
     overlay.addEventListener('mousemove', (e) => {
-      const rect = overlay.getBoundingClientRect();
-      const scaleX = img.naturalWidth / (rect.width * currentZoom / 100);
-      const scaleY = img.naturalHeight / (rect.height * currentZoom / 100);
-      const x = Math.round((e.clientX - rect.left) * scaleX);
-      const y = Math.round((e.clientY - rect.top) * scaleY);
-      sendInput('mouse', { action: 'move', x, y });
+      const { x, y } = getCoords(e);
+      sendInput({ type: 'mouse', action: 'move', x, y });
     });
     
     overlay.addEventListener('mousedown', (e) => {
       e.preventDefault();
-      const rect = overlay.getBoundingClientRect();
-      const scaleX = img.naturalWidth / (rect.width * currentZoom / 100);
-      const scaleY = img.naturalHeight / (rect.height * currentZoom / 100);
-      const x = Math.round((e.clientX - rect.left) * scaleX);
-      const y = Math.round((e.clientY - rect.top) * scaleY);
+      const { x, y } = getCoords(e);
       const button = e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle';
-      sendInput('mouse', { action: 'click', x, y, button });
+      sendInput({ type: 'mouse', action: 'click', x, y, button });
     });
     
     overlay.addEventListener('wheel', (e) => {
-      if (!e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        const direction = e.deltaY < 0 ? 'up' : 'down';
-        sendInput('mouse', { action: 'scroll', direction });
-      }
+      e.preventDefault();
+      const direction = e.deltaY < 0 ? 'up' : 'down';
+      sendInput({ type: 'mouse', action: 'scroll', direction });
     });
     
     overlay.addEventListener('contextmenu', (e) => e.preventDefault());
     
     // Keyboard events
     document.addEventListener('keydown', (e) => {
-      // Don't capture if zoom shortcuts
-      if (e.ctrlKey || e.metaKey) return;
-      
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       e.preventDefault();
-      sendInput('key', { action: 'press', key: e.key, code: e.code });
+      sendInput({ type: 'key', action: 'press', key: e.key });
     });
     
-    function sendInput(type, data) {
-      fetch('/input', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, ...data })
-      }).catch(() => {});
+    // Zoom shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === '=' || e.key === '+') { e.preventDefault(); zoomIn(); }
+        else if (e.key === '-') { e.preventDefault(); zoomOut(); }
+        else if (e.key === '0') { e.preventDefault(); zoomFit(); }
+      }
+    });
+    
+    document.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        e.deltaY < 0 ? zoomIn() : zoomOut();
+      }
+    }, { passive: false });
+    
+    function connect() {
+      const events = new EventSource('/stream');
+      events.onopen = () => {
+        status.textContent = 'Connected - Click to control remote';
+        status.className = 'status connected';
+      };
+      events.onmessage = (e) => {
+        const now = Date.now();
+        latencyDisplay.textContent = Math.min(now - lastFrameTime, 999);
+        lastFrameTime = now;
+        img.src = 'data:image/jpeg;base64,' + e.data;
+        frameCount++;
+        if (now - lastTime >= 1000) {
+          fpsDisplay.textContent = frameCount;
+          frameCount = 0;
+          lastTime = now;
+        }
+      };
+      events.onerror = () => {
+        status.textContent = 'Disconnected...';
+        status.className = 'status error';
+        events.close();
+        setTimeout(connect, 2000);
+      };
     }
     
-    // Auto fit on load
-    img.onload = () => {
-      if (currentZoom === 100) {
-        zoomFit();
-      }
-    };
-    
+    img.onload = () => { if (currentZoom === 100) zoomFit(); };
     connect();
   </script>
 </body>
