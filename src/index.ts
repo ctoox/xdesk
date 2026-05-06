@@ -60,6 +60,13 @@ async function runAgent(proxyUrl?: string): Promise<void> {
             console.log('[WebRTC] Failed, falling back to WebSocket');
           });
           
+          // WebRTC timeout - force WebSocket after 5 seconds
+          setTimeout(() => {
+            if (!webrtc.isConnected()) {
+              console.log('[WebRTC] Timeout, using WebSocket');
+            }
+          }, 5000);
+          
           capture.start((frame) => {
             if (webrtc.isConnected()) {
               // Send via WebRTC P2P
