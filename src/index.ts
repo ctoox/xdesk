@@ -161,6 +161,7 @@ async function runController(proxyUrl?: string): Promise<void> {
       console.log('');
     }
     
+    // Direct JPEG frame, no header
     viewer.updateFrame(data.toString('base64'));
     
     frameCount++;
