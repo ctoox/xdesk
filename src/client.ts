@@ -11,7 +11,7 @@ export class SignalClient {
   private maxReconnectDelay: number = 30000;
   private shouldReconnect: boolean = true;
   private onMessageCallback: ((msg: SignalMessage) => void) | null = null;
-  private onBinaryCallback: ((data: Buffer) => void) | null = null;
+  private onFrameCallback: ((frame: Buffer) => void) | null = null;
   private pingInterval: NodeJS.Timeout | null = null;
 
   constructor(url: string, proxyUrl?: string) {
@@ -40,13 +40,14 @@ export class SignalClient {
         resolve();
       });
 
-      this.ws.on('message', (data: WebSocket.Data) => {
-        if (data instanceof Buffer) {
-          // Binary message - screen frame
-          if (this.onBinaryCallback) {
-            this.onBinaryCallback(data);
+      this.ws.on('message', (data: WebSocket.Data, isBinary: boolean) => {
+        if (isBinary) {
+          // Binary = screen frame
+          if (this.onFrameCallback) {
+            this.onFrameCallback(data as Buffer);
           }
         } else {
+          // Text = JSON message
           try {
             const msg: SignalMessage = JSON.parse(data.toString());
             this.handleMessage(msg);
@@ -129,8 +130,8 @@ export class SignalClient {
     this.onMessageCallback = callback;
   }
 
-  onBinary(callback: (data: Buffer) => void): void {
-    this.onBinaryCallback = callback;
+  onFrame(callback: (frame: Buffer) => void): void {
+    this.onFrameCallback = callback;
   }
 
   getClientId(): string | null { return this.clientId; }
