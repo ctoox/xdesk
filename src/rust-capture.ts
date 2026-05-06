@@ -7,10 +7,7 @@ export class RustCapture {
   private onFrameCallback: ((frame: Buffer) => void) | null = null;
   private capturing: boolean = false;
 
-  constructor(
-    private quality: number = 70,
-    private scale: number = 0.75
-  ) {}
+  constructor(private quality: number = 70) {}
 
   start(onFrame: (frame: Buffer) => void): void {
     if (this.capturing) return;
@@ -20,7 +17,7 @@ export class RustCapture {
     
     const exePath = path.join(__dirname, '..', 'capture-rs', 'target', 'release', 'xdesk-capture.exe');
     
-    this.process = spawn(exePath, [this.quality.toString(), this.scale.toString()], {
+    this.process = spawn(exePath, [this.quality.toString()], {
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
@@ -43,7 +40,6 @@ export class RustCapture {
       this.capturing = false;
     });
 
-    // Start capture loop
     setTimeout(() => this.captureLoop(), 100);
   }
 
@@ -67,7 +63,6 @@ export class RustCapture {
     if (!this.process || !this.capturing) return;
     
     try {
-      // Send capture command (1 byte)
       this.process.stdin?.write(Buffer.from([1]));
     } catch (e) {
       console.error('[RUST] Write error:', e);
@@ -75,7 +70,6 @@ export class RustCapture {
       return;
     }
     
-    // Schedule next capture (~30fps)
     setTimeout(() => this.captureLoop(), 33);
   }
 

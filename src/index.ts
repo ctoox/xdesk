@@ -20,7 +20,7 @@ function prompt(prefix: string): Promise<string> {
 
 async function runAgent(proxyUrl?: string): Promise<void> {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
-  const capture = new RustCapture(70, 0.75);
+  const capture = new RustCapture(70);
   
   try {
     await client.connect();
