@@ -22,12 +22,10 @@ export class FFmpegCapture {
     const args = [
       '-f', 'gdigrab',
       '-framerate', String(this.fps),
-      '-video_size', `${this.width}x${this.height}`,
       '-i', 'desktop',
       '-c:v', 'mjpeg',
       '-q:v', String(this.quality),
       '-f', 'mjpeg',
-      '-preset', 'ultrafast',
       'pipe:1'
     ];
 
