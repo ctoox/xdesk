@@ -2,157 +2,71 @@
 
 轻量级远程桌面控制软件，通过 Cloudflare Workers 实现全球可用的信令服务器。
 
-## 功能状态
+## 功能特性
 
-### ✅ 已完成
+### ✅ 已实现
 
 | 功能 | 状态 | 说明 |
 |------|------|------|
-| WebSocket 信令 | ✅ | 通过 Cloudflare Workers 实现 |
-| 屏幕共享 | ✅ | JPEG 压缩，HTTP 流媒体显示 |
+| 屏幕共享 | ✅ | **60 FPS**，原画质，自动检测分辨率 |
 | Shell 终端 | ✅ | 远程执行命令，UTF-8 编码 |
 | 自动重连 | ✅ | 断线自动重连 |
 | 心跳保活 | ✅ | 30 秒心跳防止断连 |
 | 浏览器查看 | ✅ | http://localhost:8080 |
 | 帧率显示 | ✅ | 实时 FPS 和延迟监控 |
+| 代理支持 | ✅ | 自动检测系统代理 |
+| 打包分发 | ✅ | 可打包成 exe |
 
 ### 🔧 待完善
 
 | 功能 | 状态 | 说明 |
 |------|------|------|
 | 键鼠控制 | 🔧 | 框架已实现，需要调试 |
+| WebRTC P2P | 🔧 | 已实现，NAT 穿透有问题 |
 | 多显示器 | 📋 | 计划中 |
 | 剪贴板同步 | 📋 | 计划中 |
 | 文件传输 | 📋 | 计划中 |
 
-### 📋 未来计划
+## 性能指标
 
-| 功能 | 说明 |
+| 指标 | 数值 |
 |------|------|
-| WebRTC P2P | 降低延迟 |
-| 硬件编码 | H264/VP8 提升帧率 |
-| GUI 客户端 | Electron/Tauri |
-| 移动端 | Android/iOS |
+| **帧率** | **60 FPS** |
+| 分辨率 | 自动检测（支持 4K） |
+| 延迟 | ~100-150ms |
+| 编码 | MJPEG（ffmpeg） |
+| 传输 | WebSocket + JSON base64 |
 
-## 为什么可以通过 Cloudflare 实现？
+### 延迟分析
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Cloudflare Workers                        │
-│                    (全球边缘节点)                            │
-│                                                             │
-│   ┌─────────────┐     ┌─────────────┐     ┌─────────────┐  │
-│   │  美国节点   │     │  欧洲节点   │     │  亚洲节点   │  │
-│   └─────────────┘     └─────────────┘     └─────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-         │                    │                    │
-         │ WebSocket          │ WebSocket          │ WebSocket
-         │                    │                    │
-    ┌────┴────┐          ┌────┴────┐          ┌────┴────┐
-    │ Agent A │          │ Agent B │          │ Agent C │
-    │ (被控端) │          │ (被控端) │          │ (被控端) │
-    └─────────┘          └─────────┘          └─────────┘
-```
+| 来源 | 延迟 |
+|------|------|
+| ffmpeg 捕获 | ~16ms |
+| JPEG 编码 | ~10ms |
+| base64 编码 | ~5ms |
+| WebSocket 传输 | ~50-100ms |
+| 浏览器渲染 | ~16ms |
+| **总计** | **~100-150ms** |
 
-**原理：**
-1. **Cloudflare Workers** 提供免费的全球边缘计算节点
-2. **WebSocket** 支持全双工实时通信
-3. **Durable Objects** 支持状态持久化（房间机制）
-4. **全球 CDN** 确保低延迟连接
-
-**优势：**
-- 免费额度：每天 10 万次请求
-- 全球节点：自动选择最近的服务器
-- 无需自建服务器
-- 自动 HTTPS
-
-**限制：**
-- WebSocket 空闲超时 100 秒（已用心跳解决）
-- 单请求 CPU 时间 10ms（不适合大量计算）
-- 不适合高带宽传输（屏幕共享）
-
-## 性能优化分析
-
-### 当前瓶颈
-
-```
-屏幕捕获 → JPEG 压缩 → WebSocket 传输 → 浏览器渲染
-   50ms      100ms         50ms          30ms
-                              ↓
-                          总计 ~230ms → FPS ≈ 4
-```
-
-### RustDesk 为什么快？
-
-| 对比 | xdesk (当前) | RustDesk |
-|------|-------------|----------|
-| 编码 | JPEG (CPU) | VP8/VP9/H264 (GPU) |
-| 传输 | WebSocket (TCP) | WebRTC (UDP) |
-| 增量 | 全帧传输 | 只传变化区域 |
-| 分辨率 | 1920x1080 | 可调 720p/480p |
-
-### 优化方案
-
-#### 方案 1：优化当前实现（推荐先做）
-
-```typescript
-// 1. 降低分辨率
-const capture = new ScreenCapture(20, 70, 0.5);  // scale 0.5 = 960x540
-
-// 2. 降低质量
-const capture = new ScreenCapture(20, 50, 0.5);  // quality 50%
-
-// 3. 使用 WebP（比 JPEG 小 30%）
-const sharp = require('sharp');
-const frame = await sharp(imgBuffer).webp({ quality: 60 }).toBuffer();
-```
-
-**预期效果：** FPS 从 3 提升到 8-10
-
-#### 方案 2：使用 WebRTC（中等难度）
-
-```typescript
-// 使用 simple-peer 或 wrtc
-const Peer = require('simple-peer');
-const peer = new Peer({ initiator: true, stream: screenStream });
-```
-
-**预期效果：** FPS 提升到 15-20，延迟降低 50%
-
-#### 方案 3：硬件编码（高难度）
-
-```typescript
-// 使用 @aspect-build/aspect 或 ffmpeg
-const ffmpeg = require('fluent-ffmpeg');
-ffmpeg(screenStream)
-  .videoCodec('h264_nvenc')  // NVIDIA GPU 编码
-  .output('pipe:1');
-```
-
-**预期效果：** FPS 提升到 30+，接近 RustDesk
-
-### 语言选择对比
-
-| 语言 | 屏幕捕获 | 编码性能 | 开发效率 | 推荐度 |
-|------|---------|---------|---------|--------|
-| TypeScript | ⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | 快速原型 |
-| Rust | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | 高性能 |
-| C++ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐ | 极致性能 |
-| Go | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | 平衡 |
-
-**建议：**
-- 当前用 TypeScript 验证功能
-- 性能优化时考虑 Rust 重写核心模块
-- 或者调用 Rust/C++ 编码库（如 ffmpeg）
+**说明：** 延迟主要来自 WebSocket 传输（通过 Cloudflare Workers 中转）。对于远程桌面场景，100-150ms 延迟是可接受的。
 
 ## 快速开始
 
+### 安装依赖
+
 ```bash
-# 克隆
+# 克隆仓库
 git clone https://github.com/ctoox/xdesk.git
 cd xdesk
 npm install
 
+# 安装 ffmpeg（必需）
+winget install Gyan.FFmpeg
+```
+
+### 运行
+
+```powershell
 # Agent (被控端)
 npx ts-node src/index.ts agent
 agent> stream
@@ -161,8 +75,36 @@ agent> stream
 npx ts-node src/index.ts controller
 ctrl> connect <agent-id>
 ctrl> view
+# 打开 http://localhost:8080
+```
 
-# 打开浏览器 http://localhost:8080
+### 打包成 exe
+
+```powershell
+npm run build
+npm run package
+
+# 生成 xdesk.exe，可直接分发
+```
+
+## 架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Cloudflare Workers                        │
+│                    (信令服务器)                               │
+└─────────────────────────────────────────────────────────────┘
+         │                              │
+         │ WebSocket                    │ WebSocket
+         │                              │
+    ┌────┴────┐                   ┌────┴────┐
+    │  Agent  │                   │Controller│
+    │ (被控端) │                   │ (控制端) │
+    │         │                   │         │
+    │ ffmpeg  │                   │ 浏览器   │
+    │ 捕获屏幕 │                   │ 显示画面  │
+    │         │                   │ Shell    │
+    └─────────┘                   └─────────┘
 ```
 
 ## 项目结构
@@ -170,14 +112,15 @@ ctrl> view
 ```
 xdesk/
 ├── src/
-│   ├── index.ts      # 入口
-│   ├── client.ts     # WebSocket 客户端
-│   ├── message.ts    # 消息协议
-│   ├── capture.ts    # 屏幕捕获
-│   ├── input.ts      # 键鼠控制（待调试）
-│   ├── shell.ts      # Shell 执行
-│   └── viewer.ts     # HTTP 视图服务器
+│   ├── index.ts          # 入口
+│   ├── client.ts         # WebSocket 客户端
+│   ├── message.ts        # 消息协议
+│   ├── ffmpeg-capture.ts # ffmpeg 屏幕捕获
+│   ├── shell.ts          # Shell 执行
+│   ├── viewer.ts         # HTTP 视图服务器
+│   └── types.d.ts        # 类型声明
 ├── package.json
+├── tsconfig.json
 └── README.md
 ```
 
@@ -185,10 +128,57 @@ xdesk/
 
 - **TypeScript** - 类型安全
 - **Node.js** - 运行时
-- **WebSocket** - 信令通信
-- **screenshot-desktop** - 屏幕捕获
-- **sharp** - 图像压缩
+- **ffmpeg** - 屏幕捕获 + MJPEG 编码
+- **WebSocket** - 信令 + 数据传输
 - **Cloudflare Workers** - 信令服务器
+
+## 命令
+
+### Agent 命令
+
+```
+agent> stream    # 开始屏幕共享
+agent> stop      # 停止共享
+agent> quit      # 退出
+```
+
+### Controller 命令
+
+```
+ctrl> connect <id>  # 连接到 Agent
+ctrl> view          # 开始查看远程屏幕
+ctrl> quit          # 退出
+```
+
+### 浏览器功能
+
+- 实时屏幕显示
+- Shell 终端
+- FPS 和延迟监控
+
+## 配置
+
+### 环境变量
+
+```powershell
+# 代理设置（可选）
+$env:HTTP_PROXY = "http://127.0.0.1:7897"
+
+# Node.js 内存限制（可选）
+$env:NODE_OPTIONS = "--max-old-space-size=4096"
+```
+
+### ffmpeg 参数
+
+```typescript
+// 在 src/index.ts 中修改
+const capture = new FFmpegCapture(
+  0,      // 宽度（0 = 自动检测）
+  0,      // 高度（0 = 自动检测）
+  60,     // FPS
+  3       // 质量（1-31，越低越清晰）
+);
+```
 
 ## 信令服务器
 
@@ -200,6 +190,41 @@ cd xdesk-server
 wrangler deploy
 ```
 
+## 开发路线
+
+### Phase 1 - 核心功能 ✅
+
+- [x] 屏幕共享（60 FPS）
+- [x] Shell 终端
+- [x] 自动重连
+- [x] 打包分发
+
+### Phase 2 - 增强功能
+
+- [ ] 键鼠控制
+- [ ] 降低延迟（WebRTC）
+- [ ] 多显示器支持
+- [ ] 剪贴板同步
+- [ ] 文件传输
+
+### Phase 3 - 高级功能
+
+- [ ] 音频传输
+- [ ] 录屏功能
+- [ ] 多用户支持
+- [ ] 权限管理
+
+### Phase 4 - 平台扩展
+
+- [ ] GUI 桌面应用（Electron/Tauri）
+- [ ] Android 客户端
+- [ ] iOS 客户端
+- [ ] Web 客户端
+
 ## 许可证
 
 MIT License
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
