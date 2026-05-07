@@ -103,8 +103,11 @@ async function main() {
       switch (action) {
         case 'mousemove': input.mouseMove(x, y); break;
         case 'mouseclick': input.mouseClick(x, y, button); break;
+        case 'mousedown': input.mouseDown(x, y, button); break;
+        case 'mouseup': input.mouseUp(x, y, button); break;
         case 'mousescroll': input.mouseScroll(x, y, direction); break;
         case 'keypress': input.keyPress(key); break;
+        case 'keyup': input.keyUp(key); break;
         case 'typetext': input.typeText(text); break;
       }
     }

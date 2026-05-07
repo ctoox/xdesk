@@ -15,6 +15,8 @@ export class ScreenViewer {
   private onShell: ShellCallback | null = null;
   private onInput: InputCallback | null = null;
   private shellOutput: string = '';
+  private screenWidth: number = 1920;
+  private screenHeight: number = 1080;
 
   constructor(port: number = 8080) {
     this.port = port;
@@ -107,7 +109,6 @@ export class ScreenViewer {
     this.currentFrame = frameBase64;
     this.frameCount++;
     
-    // Push to SSE clients
     for (const client of this.clients) {
       try { 
         client.write('data: ' + frameBase64 + '\n\n'); 
@@ -164,7 +165,7 @@ export class ScreenViewer {
     .main { flex: 1; display: flex; overflow: hidden; }
     .screen-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .screen-frame { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.6); }
-    #screen { display: block; max-width: 100%; max-height: calc(100vh - 100px); object-fit: contain; background: #000; min-width: 640px; min-height: 360px; }
+    #screen { display: block; max-width: 100%; max-height: calc(100vh - 100px); object-fit: contain; background: #000; }
     #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
     .screen-badge { position: absolute; top: 10px; left: 10px; padding: 4px 10px; background: rgba(0,0,0,0.6); border-radius: 20px; font-size: 11px; display: flex; align-items: center; gap: 6px; }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
@@ -187,6 +188,7 @@ export class ScreenViewer {
     .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px; background: #1a1a1a; border-top: 1px solid #2a2a2a; font-size: 11px; color: #555; }
     .status-left, .status-right { display: flex; gap: 16px; }
     .status-item { display: flex; align-items: center; gap: 4px; }
+    .coord-display { font-family: monospace; color: #4f9cf7; }
   </style>
 </head>
 <body>
@@ -201,6 +203,7 @@ export class ScreenViewer {
         <div class="stat"><div class="stat-dot"></div><span>FPS</span><span class="stat-value" id="fps">0</span></div>
         <div class="stat"><span>延迟</span><span class="stat-value" id="latency">0ms</span></div>
         <div class="stat"><span>分辨率</span><span class="stat-value" id="resolution">-</span></div>
+        <div class="stat"><span>坐标</span><span class="stat-value coord-display" id="coords">0,0</span></div>
       </div>
       <div class="btns">
         <button class="btn btn-ghost" onclick="toggleSidebar()">Terminal</button>
@@ -253,6 +256,7 @@ export class ScreenViewer {
     var fpsEl = document.getElementById('fps');
     var latEl = document.getElementById('latency');
     var resEl = document.getElementById('resolution');
+    var coordsEl = document.getElementById('coords');
     var outEl = document.getElementById('output');
     var cmdEl = document.getElementById('cmd');
     var statusEl = document.getElementById('status-badge');
@@ -263,64 +267,125 @@ export class ScreenViewer {
     var frames = 0, lastSec = Date.now(), lastFrame = Date.now();
     var lastOut = '', startTime = Date.now(), lastBw = Date.now(), bytes = 0;
 
-    function sendInput(d) {
-      fetch('/input', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d)});
-    }
-
+    // 坐标转换：网页坐标 -> 屏幕坐标
     function getCoords(e) {
-      var r = overlay.getBoundingClientRect();
-      var iw = img.naturalWidth || 1920, ih = img.naturalHeight || 1080;
-      return {
-        x: Math.max(0, Math.min(iw, Math.round((e.clientX-r.left)/r.width*iw))),
-        y: Math.max(0, Math.min(ih, Math.round((e.clientY-r.top)/r.height*ih)))
-      };
+      var rect = overlay.getBoundingClientRect();
+      
+      // 鼠标相对于 overlay 的位置 (0-1)
+      var relX = (e.clientX - rect.left) / rect.width;
+      var relY = (e.clientY - rect.top) / rect.height;
+      
+      // 限制在 0-1 范围内
+      relX = Math.max(0, Math.min(1, relX));
+      relY = Math.max(0, Math.min(1, relY));
+      
+      // 转换为实际屏幕坐标
+      var screenW = img.naturalWidth || 1920;
+      var screenH = img.naturalHeight || 1080;
+      
+      var x = Math.round(relX * screenW);
+      var y = Math.round(relY * screenH);
+      
+      // 更新坐标显示
+      coordsEl.textContent = x + ',' + y;
+      
+      return { x: x, y: y };
     }
 
+    function sendInput(d) {
+      fetch('/input', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(d)
+      });
+    }
+
+    // 鼠标移动
     overlay.addEventListener('mousemove', function(e) {
       var p = getCoords(e);
-      sendInput({action:'mousemove', x:p.x, y:p.y});
+      sendInput({ action: 'mousemove', x: p.x, y: p.y });
     });
 
+    // 鼠标点击
     overlay.addEventListener('mousedown', function(e) {
       e.preventDefault();
       var p = getCoords(e);
-      var b = e.button===0?'left':e.button===2?'right':'middle';
-      sendInput({action:'mouseclick', x:p.x, y:p.y, button:b});
+      var button = e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle';
+      sendInput({ action: 'mouseclick', x: p.x, y: p.y, button: button });
     });
 
+    // 鼠标释放（用于拖放）
+    overlay.addEventListener('mouseup', function(e) {
+      e.preventDefault();
+      var p = getCoords(e);
+      var button = e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle';
+      sendInput({ action: 'mouseup', x: p.x, y: p.y, button: button });
+    });
+
+    // 拖放支持
+    overlay.addEventListener('dragstart', function(e) {
+      e.preventDefault();
+      var p = getCoords(e);
+      sendInput({ action: 'dragstart', x: p.x, y: p.y });
+    });
+
+    overlay.addEventListener('drag', function(e) {
+      e.preventDefault();
+      var p = getCoords(e);
+      sendInput({ action: 'drag', x: p.x, y: p.y });
+    });
+
+    overlay.addEventListener('dragend', function(e) {
+      e.preventDefault();
+      var p = getCoords(e);
+      sendInput({ action: 'dragend', x: p.x, y: p.y });
+    });
+
+    // 滚轮
     overlay.addEventListener('wheel', function(e) {
       e.preventDefault();
-      sendInput({action:'mousescroll', x:0, y:0, direction:e.deltaY<0?'up':'down'});
+      var p = getCoords(e);
+      sendInput({ action: 'mousescroll', x: p.x, y: p.y, direction: e.deltaY < 0 ? 'up' : 'down' });
     });
 
+    // 禁用右键菜单
     overlay.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
+    // 键盘事件
     document.addEventListener('keydown', function(e) {
-      if (e.target===cmdEl) return;
+      if (e.target === cmdEl) return;
       e.preventDefault();
-      sendInput({action:'keypress', key:e.key});
+      sendInput({ action: 'keypress', key: e.key });
     });
 
+    document.addEventListener('keyup', function(e) {
+      if (e.target === cmdEl) return;
+      e.preventDefault();
+      sendInput({ action: 'keyup', key: e.key });
+    });
+
+    // 终端输入
     cmdEl.addEventListener('keydown', function(e) {
-      if (e.key==='Enter') {
+      if (e.key === 'Enter') {
         var c = cmdEl.value.trim();
         if (c) {
-          outEl.textContent += '$ '+c+'\\n';
+          outEl.textContent += '$ ' + c + '\\n';
           outEl.scrollTop = outEl.scrollHeight;
-          fetch('/shell', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({command:c})});
+          fetch('/shell', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: c }) });
           cmdEl.value = '';
         }
       }
       e.stopPropagation();
     });
 
+    // 轮询 Shell 输出
     setInterval(function() {
-      fetch('/shell-output').then(function(r){return r.text();}).then(function(t) {
-        if (t!==lastOut) { outEl.textContent=t; outEl.scrollTop=outEl.scrollHeight; lastOut=t; }
-      }).catch(function(){});
+      fetch('/shell-output').then(function(r) { return r.text(); }).then(function(t) {
+        if (t !== lastOut) { outEl.textContent = t; outEl.scrollTop = outEl.scrollHeight; lastOut = t; }
+      }).catch(function() {});
     }, 300);
 
-    // Use SSE for real-time updates
+    // SSE 连接
     var pendingFrame = null;
     var rendering = false;
 
@@ -328,12 +393,12 @@ export class ScreenViewer {
       if (pendingFrame && !rendering) {
         rendering = true;
         var now = Date.now();
-        latEl.textContent = Math.min(now-lastFrame, 999) + 'ms';
+        latEl.textContent = Math.min(now - lastFrame, 999) + 'ms';
         lastFrame = now;
         img.src = 'data:image/jpeg;base64,' + pendingFrame;
         bytes += pendingFrame.length;
         frames++;
-        if (now-lastSec >= 1000) {
+        if (now - lastSec >= 1000) {
           fpsEl.textContent = frames;
           frames = 0;
           lastSec = now;
@@ -356,7 +421,6 @@ export class ScreenViewer {
         document.querySelector('.badge-dot').style.background = '#22c55e';
       };
       es.onmessage = function(e) {
-        // Just store latest frame, don't queue
         pendingFrame = e.data;
       };
       es.onerror = function() {
@@ -368,24 +432,26 @@ export class ScreenViewer {
       };
     }
 
+    // 统计更新
     function updateStats() {
       var now = Date.now();
-      var el = Math.floor((now-startTime)/1000);
-      var h = String(Math.floor(el/3600)).padStart(2, '0');
-      var m = String(Math.floor((el%3600)/60)).padStart(2, '0');
-      var s = String(el%60).padStart(2, '0');
-      upEl.textContent = h+':'+m+':'+s;
-      var be = (now-lastBw)/1000;
+      var el = Math.floor((now - startTime) / 1000);
+      var h = String(Math.floor(el / 3600)).padStart(2, '0');
+      var m = String(Math.floor((el % 3600) / 60)).padStart(2, '0');
+      var s = String(el % 60).padStart(2, '0');
+      upEl.textContent = h + ':' + m + ':' + s;
+      var be = (now - lastBw) / 1000;
       if (be >= 1) {
-        bwEl.textContent = Math.round(bytes/be/1024) + ' KB/s';
+        bwEl.textContent = Math.round(bytes / be / 1024) + ' KB/s';
         bytes = 0;
         lastBw = now;
       }
     }
     setInterval(updateStats, 1000);
 
+    // UI 功能
     function toggleSidebar() {
-      sidebar.style.display = sidebar.style.display==='none' ? 'flex' : 'none';
+      sidebar.style.display = sidebar.style.display === 'none' ? 'flex' : 'none';
     }
 
     function toggleFullscreen() {
@@ -393,7 +459,7 @@ export class ScreenViewer {
       else document.exitFullscreen();
     }
 
-    // Start connection
+    // 启动
     connect();
   </script>
 </body>
