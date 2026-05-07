@@ -450,19 +450,44 @@ export class ScreenViewer {
       var overlayW = rect.width;
       var overlayH = rect.height;
       
+      // 图像在 overlay 中的实际显示尺寸和偏移
       var imgAspect = remoteWidth / remoteHeight;
       var overlayAspect = overlayW / overlayH;
       var displayW, displayH, offsetX, offsetY;
       
       if (imgAspect > overlayAspect) {
-        displayW = overlayW; displayH = overlayW / imgAspect; offsetX = 0; offsetY = (overlayH - displayH) / 2;
+        displayW = overlayW;
+        displayH = overlayW / imgAspect;
+        offsetX = 0;
+        offsetY = (overlayH - displayH) / 2;
       } else {
-        displayH = overlayH; displayW = overlayH * imgAspect; offsetX = (overlayW - displayW) / 2; offsetY = 0;
+        displayH = overlayH;
+        displayW = overlayH * imgAspect;
+        offsetX = (overlayW - displayW) / 2;
+        offsetY = 0;
       }
       
-      // 映射到远程屏幕坐标（物理分辨率）
-      var x = Math.max(0, Math.min(remoteWidth, Math.round((mouseX - offsetX) / displayW * remoteWidth)));
-      var y = Math.max(0, Math.min(remoteHeight, Math.round((mouseY - offsetY) / displayH * remoteHeight)));
+      // 鼠标相对于图像的位置 (0 到 1)
+      var relX = (mouseX - offsetX) / displayW;
+      var relY = (mouseY - offsetY) / displayH;
+      
+      // 限制在 0-1 范围
+      relX = Math.max(0, Math.min(1, relX));
+      relY = Math.max(0, Math.min(1, relY));
+      
+      // 映射到远程屏幕坐标
+      var x = Math.round(relX * remoteWidth);
+      var y = Math.round(relY * remoteHeight);
+      
+      // 调试日志（每10次输出一次）
+      if (Math.random() < 0.1) {
+        console.log('Mouse:', mouseX.toFixed(0), mouseY.toFixed(0),
+                    'Display:', displayW.toFixed(0), displayH.toFixed(0),
+                    'Offset:', offsetX.toFixed(0), offsetY.toFixed(0),
+                    'Rel:', relX.toFixed(3), relY.toFixed(3),
+                    'Remote:', x, y);
+      }
+      
       coordsEl.textContent = x + ',' + y;
       return { x: x, y: y };
     }
