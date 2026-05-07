@@ -7,7 +7,7 @@ export class RustCapture {
   private onFrameCallback: ((frame: Buffer) => void) | null = null;
   private capturing: boolean = false;
 
-  constructor(private quality: number = 80) {}
+  constructor(private quality: number = 60) {}
 
   start(onFrame: (frame: Buffer) => void): void {
     if (this.capturing) return;

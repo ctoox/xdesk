@@ -13,8 +13,8 @@ export interface Config {
 const DEFAULT_CONFIG: Config = {
   signal_server: 'wss://xdesk.ctoocn.workers.dev/ws?room=test',
   room: 'default',
-  fps: 15,
-  quality: 3,
+  fps: 30,
+  quality: 5,
   proxy: null,
 };
 
