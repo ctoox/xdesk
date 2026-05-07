@@ -1,30 +1,35 @@
 use std::io::{self, BufRead, Write};
 use windows::Win32::UI::Input::KeyboardAndMouse::*;
 
-const SM_CXSCREEN: i32 = 0;
-const SM_CYSCREEN: i32 = 1;
+const SM_XVIRTUALSCREEN: i32 = 76;
+const SM_YVIRTUALSCREEN: i32 = 77;
+const SM_CXVIRTUALSCREEN: i32 = 78;
+const SM_CYVIRTUALSCREEN: i32 = 79;
 
 #[link(name = "user32")]
 extern "system" {
     fn GetSystemMetrics(nIndex: i32) -> i32;
 }
 
-fn send_mouse_move(x: i32, y: i32) {
+fn mouse_move_to(x: i32, y: i32) {
     unsafe {
-        let screen_width = GetSystemMetrics(SM_CXSCREEN);
-        let screen_height = GetSystemMetrics(SM_CYSCREEN);
+        let vx = GetSystemMetrics(SM_XVIRTUALSCREEN);
+        let vy = GetSystemMetrics(SM_YVIRTUALSCREEN);
+        let vw = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+        let vh = GetSystemMetrics(SM_CYVIRTUALSCREEN);
         
-        let normalized_x = (x as f64 / screen_width as f64 * 65535.0) as i32;
-        let normalized_y = (y as f64 / screen_height as f64 * 65535.0) as i32;
+        // 归一化到 0-65535 范围
+        let nx = ((x - vx) as i64 * 65535 / vw as i64) as i32;
+        let ny = ((y - vy) as i64 * 65535 / vh as i64) as i32;
         
         let input = INPUT {
             r#type: INPUT_MOUSE,
             Anonymous: INPUT_0 {
                 mi: MOUSEINPUT {
-                    dx: normalized_x,
-                    dy: normalized_y,
+                    dx: nx,
+                    dy: ny,
                     mouseData: 0,
-                    dwFlags: MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE,
+                    dwFlags: MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK,
                     time: 0,
                     dwExtraInfo: 0,
                 },
@@ -35,8 +40,8 @@ fn send_mouse_move(x: i32, y: i32) {
     }
 }
 
-fn send_mouse_click(x: i32, y: i32, button: &str) {
-    send_mouse_move(x, y);
+fn mouse_click(x: i32, y: i32, button: &str) {
+    mouse_move_to(x, y);
     
     unsafe {
         let (down_flag, up_flag) = match button {
@@ -70,17 +75,17 @@ fn send_mouse_click(x: i32, y: i32, button: &str) {
     }
 }
 
-fn send_mouse_scroll(x: i32, y: i32, direction: &str) {
-    send_mouse_move(x, y);
+fn mouse_scroll(x: i32, y: i32, direction: &str) {
+    mouse_move_to(x, y);
     
     unsafe {
-        let delta: u32 = if direction == "up" { 120 } else { 65536 - 120 };
+        let delta: i32 = if direction == "up" { 120 } else { -120 };
         
         let input = INPUT {
             r#type: INPUT_MOUSE,
             Anonymous: INPUT_0 {
                 mi: MOUSEINPUT {
-                    dx: 0, dy: 0, mouseData: delta,
+                    dx: 0, dy: 0, mouseData: delta as u32,
                     dwFlags: MOUSEEVENTF_WHEEL, time: 0, dwExtraInfo: 0,
                 },
             },
@@ -90,10 +95,10 @@ fn send_mouse_scroll(x: i32, y: i32, direction: &str) {
     }
 }
 
-fn send_key_press(key: &str) {
+fn key_press(key: &str) {
     unsafe {
         let vk = match key.to_lowercase().as_str() {
-            "enter" => VK_RETURN,
+            "enter" | "return" => VK_RETURN,
             "backspace" => VK_BACK,
             "tab" => VK_TAB,
             "escape" | "esc" => VK_ESCAPE,
@@ -101,16 +106,17 @@ fn send_key_press(key: &str) {
             "insert" => VK_INSERT,
             "home" => VK_HOME,
             "end" => VK_END,
-            "pageup" => VK_PRIOR,
-            "pagedown" => VK_NEXT,
-            "up" => VK_UP,
-            "down" => VK_DOWN,
-            "left" => VK_LEFT,
-            "right" => VK_RIGHT,
-            "space" => VK_SPACE,
+            "pageup" | "page up" => VK_PRIOR,
+            "pagedown" | "page down" => VK_NEXT,
+            "up" | "arrowup" => VK_UP,
+            "down" | "arrowdown" => VK_DOWN,
+            "left" | "arrowleft" => VK_LEFT,
+            "right" | "arrowright" => VK_RIGHT,
+            " " | "space" => VK_SPACE,
             "shift" => VK_SHIFT,
             "control" | "ctrl" => VK_CONTROL,
-            "alt" => VK_MENU,
+            "alt" | "menu" => VK_MENU,
+            "meta" | "win" | "super" => VK_LWIN,
             "f1" => VK_F1, "f2" => VK_F2, "f3" => VK_F3, "f4" => VK_F4,
             "f5" => VK_F5, "f6" => VK_F6, "f7" => VK_F7, "f8" => VK_F8,
             "f9" => VK_F9, "f10" => VK_F10, "f11" => VK_F11, "f12" => VK_F12,
@@ -153,7 +159,7 @@ fn send_key_press(key: &str) {
     }
 }
 
-fn send_type_text(text: &str) {
+fn type_text(text: &str) {
     for c in text.chars() {
         unsafe {
             let input = INPUT {
@@ -200,7 +206,7 @@ fn main() {
             "mousemove" => {
                 if parts.len() >= 3 {
                     if let (Ok(x), Ok(y)) = (parts[1].parse(), parts[2].parse()) {
-                        send_mouse_move(x, y);
+                        mouse_move_to(x, y);
                     }
                 }
             }
@@ -209,7 +215,7 @@ fn main() {
                     let x: i32 = parts[1].parse().unwrap_or(0);
                     let y: i32 = parts[2].parse().unwrap_or(0);
                     let button = if parts.len() >= 4 { parts[3] } else { "left" };
-                    send_mouse_click(x, y, button);
+                    mouse_click(x, y, button);
                 }
             }
             "mousescroll" => {
@@ -217,17 +223,17 @@ fn main() {
                     let x: i32 = parts[1].parse().unwrap_or(0);
                     let y: i32 = parts[2].parse().unwrap_or(0);
                     let direction = if parts.len() >= 4 { parts[3] } else { "down" };
-                    send_mouse_scroll(x, y, direction);
+                    mouse_scroll(x, y, direction);
                 }
             }
-            "keypress" => {
+            "keypress" | "key" => {
                 if parts.len() >= 2 {
-                    send_key_press(parts[1]);
+                    key_press(parts[1]);
                 }
             }
-            "typetext" => {
+            "typetext" | "type" => {
                 if parts.len() >= 2 {
-                    send_type_text(parts[1]);
+                    type_text(parts[1]);
                 }
             }
             "quit" => break,

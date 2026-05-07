@@ -384,7 +384,6 @@ export class ScreenViewer {
     var frames = 0, lastSec = Date.now(), lastFrame = Date.now();
     var lastOut = '', startTime = Date.now(), lastBw = Date.now(), bytes = 0;
     var remoteWidth = 1920, remoteHeight = 1080;
-    var dpiScale = 1.0;
 
     // 获取我的 ID
     fetch('/api/id').then(function(r) { return r.json(); }).then(function(d) {
@@ -442,32 +441,7 @@ export class ScreenViewer {
       remoteWidth = img.naturalWidth;
       remoteHeight = img.naturalHeight;
       resEl.textContent = remoteWidth + 'x' + remoteHeight;
-      detectDpiScale();
     };
-
-    function detectDpiScale() {
-      var scales = [1.0, 1.25, 1.5, 1.75, 2.0];
-      var ratioX = remoteWidth / 1920;
-      var ratioY = remoteHeight / 1080;
-      var ratio = (ratioX + ratioY) / 2;
-      var closest = 1.0;
-      var minDiff = Infinity;
-      for (var i = 0; i < scales.length; i++) {
-        var diff = Math.abs(ratio - scales[i]);
-        if (diff < minDiff) { minDiff = diff; closest = scales[i]; }
-      }
-      dpiScale = closest;
-      
-      var logicalW = Math.round(remoteWidth / dpiScale);
-      var logicalH = Math.round(remoteHeight / dpiScale);
-      
-      console.log('Physical: ' + remoteWidth + 'x' + remoteHeight);
-      console.log('DPI scale: ' + (dpiScale * 100) + '%');
-      console.log('Logical: ' + logicalW + 'x' + logicalH);
-      
-      // 更新显示
-      resEl.textContent = logicalW + 'x' + logicalH + ' (' + (dpiScale * 100) + '%)';
-    }
 
     function getCoords(e) {
       var rect = overlay.getBoundingClientRect();
@@ -475,10 +449,6 @@ export class ScreenViewer {
       var mouseY = e.clientY - rect.top;
       var overlayW = rect.width;
       var overlayH = rect.height;
-      
-      // 使用逻辑分辨率（物理分辨率 / DPI缩放）
-      var logicalW = Math.round(remoteWidth / dpiScale);
-      var logicalH = Math.round(remoteHeight / dpiScale);
       
       var imgAspect = remoteWidth / remoteHeight;
       var overlayAspect = overlayW / overlayH;
@@ -490,9 +460,9 @@ export class ScreenViewer {
         displayH = overlayH; displayW = overlayH * imgAspect; offsetX = (overlayW - displayW) / 2; offsetY = 0;
       }
       
-      // 映射到逻辑分辨率
-      var x = Math.max(0, Math.min(logicalW, Math.round((mouseX - offsetX) / displayW * logicalW)));
-      var y = Math.max(0, Math.min(logicalH, Math.round((mouseY - offsetY) / displayH * logicalH)));
+      // 映射到远程屏幕坐标（物理分辨率）
+      var x = Math.max(0, Math.min(remoteWidth, Math.round((mouseX - offsetX) / displayW * remoteWidth)));
+      var y = Math.max(0, Math.min(remoteHeight, Math.round((mouseY - offsetY) / displayH * remoteHeight)));
       coordsEl.textContent = x + ',' + y;
       return { x: x, y: y };
     }
