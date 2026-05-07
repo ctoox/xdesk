@@ -4,6 +4,7 @@ import { SignalMessage } from './message';
 import { ScreenViewer } from './viewer';
 import { executeCommand } from './shell';
 import { FFmpegCapture } from './ffmpeg-capture';
+import { InputController } from './input';
 
 const SIGNAL_URL = 'wss://xdesk.ctoocn.workers.dev/ws?room=test';
 
@@ -22,6 +23,7 @@ async function main(proxyUrl?: string) {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
   const capture = new FFmpegCapture(0, 0, 60, 3);
   const viewer = new ScreenViewer(8080);
+  const input = new InputController();
   
   try {
     await client.connect();
@@ -47,6 +49,9 @@ async function main(proxyUrl?: string) {
   let frameCount = 0;
   let lastFpsTime = Date.now();
   let currentFps = 0;
+
+  // Start input controller
+  input.start();
 
   // Handle incoming messages
   client.onMessage((msg: SignalMessage) => {
@@ -82,6 +87,28 @@ async function main(proxyUrl?: string) {
       });
     }
 
+    // Input event received - execute locally
+    if (msg.type === 'input' && msg.data) {
+      const { action, x, y, button, key, text, direction } = msg.data;
+      switch (action) {
+        case 'mousemove':
+          input.mouseMove(x, y);
+          break;
+        case 'mouseclick':
+          input.mouseClick(x, y, button);
+          break;
+        case 'mousescroll':
+          input.mouseScroll(x, y, direction);
+          break;
+        case 'keypress':
+          input.keyPress(key);
+          break;
+        case 'typetext':
+          input.typeText(text);
+          break;
+      }
+    }
+
     // Shell output received
     if (msg.type === 'shell-output' && msg.data?.output) {
       viewer.appendShellOutput(msg.data.output);
@@ -94,6 +121,16 @@ async function main(proxyUrl?: string) {
         client.send({ type: 'shell-output', to: msg.id!, data: { output } });
       });
     }
+  });
+
+  // Input callback from viewer (browser)
+  viewer.setInputCallback((action: string, data: any) => {
+    if (!targetPeer) return;
+    client.send({
+      type: 'input',
+      to: targetPeer,
+      data: { action, ...data }
+    });
   });
 
   // Shell callback from viewer
@@ -115,8 +152,8 @@ async function main(proxyUrl?: string) {
   console.log('');
 
   while (true) {
-    const input = await prompt('xdesk');
-    const parts = input.trim().split(/\s+/);
+    const inputCmd = await prompt('xdesk');
+    const parts = inputCmd.trim().split(/\s+/);
     if (parts[0] === 'quit' || parts[0] === 'exit') break;
 
     switch (parts[0]) {
@@ -126,7 +163,6 @@ async function main(proxyUrl?: string) {
         } else {
           targetPeer = parts[1];
           console.log(`Connected to: ${targetPeer}`);
-          // Auto-request screen
           client.send({ type: 'screen-request', to: targetPeer, data: { fps: 60 } });
           console.log('Requesting screen...');
         }
@@ -169,11 +205,12 @@ async function main(proxyUrl?: string) {
         break;
 
       default:
-        if (input.trim()) console.log('Unknown command');
+        if (input) console.log('Unknown command');
     }
   }
 
   capture.stop();
+  input.stop();
   if (viewerStarted) viewer.stop();
   client.disconnect();
   rl.close();

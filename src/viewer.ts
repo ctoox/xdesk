@@ -1,6 +1,7 @@
 import * as http from 'http';
 
 export type ShellCallback = (command: string) => void;
+export type InputCallback = (action: string, data: any) => void;
 
 export class ScreenViewer {
   private server: http.Server | null = null;
@@ -12,6 +13,7 @@ export class ScreenViewer {
   private lastFpsUpdate: number = 0;
   private currentFps: number = 0;
   private onShell: ShellCallback | null = null;
+  private onInput: InputCallback | null = null;
   private shellOutput: string = '';
 
   constructor(port: number = 8080) {
@@ -20,6 +22,10 @@ export class ScreenViewer {
 
   setShellCallback(callback: ShellCallback): void {
     this.onShell = callback;
+  }
+
+  setInputCallback(callback: InputCallback): void {
+    this.onInput = callback;
   }
 
   appendShellOutput(data: string): void {
@@ -47,6 +53,19 @@ export class ScreenViewer {
         this.clients.add(res);
         if (this.currentFrame) res.write(`data: ${this.currentFrame}\n\n`);
         req.on('close', () => { this.clients.delete(res); });
+      } else if (req.url === '/input' && req.method === 'POST') {
+        let body = '';
+        req.on('data', (chunk) => body += chunk);
+        req.on('end', () => {
+          try {
+            const input = JSON.parse(body);
+            if (this.onInput) {
+              this.onInput(input.action, input);
+            }
+          } catch (e) {}
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end('{"ok":true}');
+        });
       } else if (req.url === '/shell' && req.method === 'POST') {
         let body = '';
         req.on('data', (chunk) => body += chunk);
@@ -109,8 +128,9 @@ export class ScreenViewer {
     .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; background: #1e1e1e; border-bottom: 1px solid #333; height: 32px; flex-shrink: 0; }
     .toolbar span { color: #888; font-size: 11px; }
     .toolbar b { color: #4CAF50; }
-    .view { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #111; }
-    #screen { width: 100%; height: 100%; object-fit: contain; }
+    .view { flex: 1; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #111; position: relative; }
+    #screen { max-width: 100%; max-height: 100%; object-fit: contain; }
+    #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
     .sidebar { width: 300px; background: #1a1a1a; border-left: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
     .sidebar-h { padding: 6px 10px; background: #252525; color: #ccc; font-size: 11px; border-bottom: 1px solid #333; }
     #out { flex: 1; overflow-y: auto; padding: 6px; font-family: Consolas, monospace; font-size: 11px; color: #d4d4d4; white-space: pre-wrap; }
@@ -128,6 +148,7 @@ export class ScreenViewer {
     </div>
     <div class="view">
       <img id="screen" src="" alt="" />
+      <div id="overlay"></div>
     </div>
   </div>
   <div class="sidebar">
@@ -140,11 +161,51 @@ export class ScreenViewer {
   </div>
   <script>
     const img = document.getElementById('screen');
+    const overlay = document.getElementById('overlay');
     const fpsEl = document.getElementById('fps');
     const latEl = document.getElementById('lat');
     const out = document.getElementById('out');
     const cmd = document.getElementById('cmd');
     let frames = 0, lastSec = Date.now(), lastFrame = Date.now(), lastOut = '';
+    
+    function sendInput(data) {
+      fetch('/input', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+    }
+    
+    function getCoords(e) {
+      const rect = overlay.getBoundingClientRect();
+      const iw = img.naturalWidth || 1920;
+      const ih = img.naturalHeight || 1080;
+      const x = Math.round((e.clientX - rect.left) / rect.width * iw);
+      const y = Math.round((e.clientY - rect.top) / rect.height * ih);
+      return { x: Math.max(0, Math.min(iw, x)), y: Math.max(0, Math.min(ih, y)) };
+    }
+    
+    overlay.addEventListener('mousemove', (e) => {
+      const { x, y } = getCoords(e);
+      sendInput({ action: 'mousemove', x, y });
+    });
+    
+    overlay.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const { x, y } = getCoords(e);
+      const button = e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle';
+      sendInput({ action: 'mouseclick', x, y, button });
+    });
+    
+    overlay.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const direction = e.deltaY < 0 ? 'up' : 'down';
+      sendInput({ action: 'mousescroll', x: 0, y: 0, direction });
+    });
+    
+    overlay.addEventListener('contextmenu', (e) => e.preventDefault());
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.target === cmd) return;
+      e.preventDefault();
+      sendInput({ action: 'keypress', key: e.key });
+    });
     
     cmd.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
