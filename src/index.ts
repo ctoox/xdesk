@@ -6,7 +6,7 @@ import { executeCommand } from './shell';
 import { FFmpegCapture } from './ffmpeg-capture';
 import { InputController } from './input';
 import { loadConfig } from './config';
-import { formatId, parseId } from './id';
+import { formatId } from './id';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -48,8 +48,11 @@ async function main() {
   await new Promise(resolve => setTimeout(resolve, 1000));
 
   const clientId = client.getClientId();
+  let shortId = '';
+  
   if (clientId) {
-    const shortId = clientId.substring(0, 9);
+    shortId = clientId.substring(0, 9);
+    viewer.setMyId(shortId);
     console.log('========================================');
     console.log('  Your ID: ' + formatId(shortId));
     console.log('========================================');
@@ -64,10 +67,18 @@ async function main() {
 
   input.start();
 
+  // 设置浏览器连接回调
+  viewer.setConnectCallback((peerId: string) => {
+    targetPeer = peerId;
+    console.log('[CONNECT] Connecting to: ' + formatId(peerId));
+    client.send({ type: 'screen-request', to: targetPeer, data: { fps: config.fps } });
+  });
+
   client.onMessage((msg: SignalMessage) => {
     if (msg.type === 'screen' && msg.data?.frame) {
       if (!viewerStarted) {
         viewer.start();
+        viewer.openBrowser();
         viewerStarted = true;
         console.log('Screen viewer: http://localhost:8080');
       }
@@ -83,7 +94,7 @@ async function main() {
     }
 
     if (msg.type === 'screen-request' && msg.id) {
-      console.log('[SHARE] ' + msg.id + ' requested screen');
+      console.log('[SHARE] ' + formatId(msg.id) + ' requested screen');
       targetPeer = msg.id;
       capture.start((frame) => {
         if (!targetPeer) return;
@@ -134,13 +145,18 @@ async function main() {
     client.send({ type: 'shell', to: targetPeer, data: { command } });
   });
 
+  // 启动 viewer 并打开浏览器
+  viewer.start();
+  viewer.openBrowser();
+
   console.log('Commands:');
-  console.log('  connect <id>  - Connect to peer (e.g., connect 123-456-789)');
+  console.log('  connect <id>  - Connect to peer');
   console.log('  peers         - List online peers');
   console.log('  share         - Share your screen');
   console.log('  stop          - Stop sharing');
-  console.log('  config        - Show config');
   console.log('  quit          - Exit');
+  console.log('');
+  console.log('Or use the web interface at http://localhost:8080');
   console.log('');
 
   while (true) {
@@ -152,26 +168,23 @@ async function main() {
       case 'connect':
         if (parts.length < 2) {
           console.log('Usage: connect <id>');
-          console.log('Example: connect 123-456-789');
         } else {
-          const rawId = parseId(parts[1]);
-          if (rawId.length < 9) {
-            // 部分匹配，查找在线的 peer
-            const peers = client.getPeers();
-            const match = peers.find(p => p.startsWith(rawId));
-            if (match) {
-              targetPeer = match;
-              console.log('Connected to: ' + formatId(match));
-              client.send({ type: 'screen-request', to: targetPeer, data: { fps: config.fps } });
-              console.log('Requesting screen...');
-            } else {
-              console.log('No peer found starting with: ' + rawId);
-            }
-          } else {
-            targetPeer = rawId;
-            console.log('Connected to: ' + formatId(targetPeer));
+          const rawId = parts[1].replace(/[^0-9]/g, '');
+          const peers = client.getPeers();
+          const match = rawId.length < 9 
+            ? peers.find(p => p.startsWith(rawId))
+            : peers.find(p => p === rawId);
+          
+          if (match) {
+            targetPeer = match;
+            console.log('Connected to: ' + formatId(match));
             client.send({ type: 'screen-request', to: targetPeer, data: { fps: config.fps } });
-            console.log('Requesting screen...');
+          } else if (rawId.length >= 9) {
+            targetPeer = rawId;
+            console.log('Connecting to: ' + formatId(rawId));
+            client.send({ type: 'screen-request', to: targetPeer, data: { fps: config.fps } });
+          } else {
+            console.log('No peer found matching: ' + rawId);
           }
         }
         break;

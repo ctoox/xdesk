@@ -1,7 +1,9 @@
 import * as http from 'http';
+import { exec } from 'child_process';
 
 export type ShellCallback = (command: string) => void;
 export type InputCallback = (action: string, data: any) => void;
+export type ConnectCallback = (peerId: string) => void;
 
 export class ScreenViewer {
   private server: http.Server | null = null;
@@ -14,7 +16,9 @@ export class ScreenViewer {
   private currentFps: number = 0;
   private onShell: ShellCallback | null = null;
   private onInput: InputCallback | null = null;
+  private onConnect: ConnectCallback | null = null;
   private shellOutput: string = '';
+  private myId: string = '';
 
   constructor(port: number = 8080) {
     this.port = port;
@@ -28,11 +32,39 @@ export class ScreenViewer {
     this.onInput = callback;
   }
 
+  setConnectCallback(callback: ConnectCallback): void {
+    this.onConnect = callback;
+  }
+
+  setMyId(id: string): void {
+    this.myId = id;
+  }
+
   appendShellOutput(data: string): void {
     this.shellOutput += data;
     if (this.shellOutput.length > 100000) {
       this.shellOutput = this.shellOutput.slice(-100000);
     }
+  }
+
+  openBrowser(): void {
+    const url = 'http://localhost:' + this.port;
+    const platform = process.platform;
+    let cmd: string;
+    
+    if (platform === 'win32') {
+      cmd = 'start ' + url;
+    } else if (platform === 'darwin') {
+      cmd = 'open ' + url;
+    } else {
+      cmd = 'xdg-open ' + url;
+    }
+    
+    exec(cmd, (err) => {
+      if (err) {
+        console.log('Open browser manually: ' + url);
+      }
+    });
   }
 
   start(): void {
@@ -43,6 +75,22 @@ export class ScreenViewer {
       if (req.url === '/' || req.url === '/index.html') {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(this.getHtml());
+      } else if (req.url === '/api/id') {
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        res.end(JSON.stringify({ id: this.myId }));
+      } else if (req.url === '/api/connect' && req.method === 'POST') {
+        let body = '';
+        req.on('data', (chunk) => body += chunk);
+        req.on('end', () => {
+          try {
+            const { peerId } = JSON.parse(body);
+            if (this.onConnect && peerId) {
+              this.onConnect(peerId);
+            }
+          } catch (e) {}
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end('{"ok":true}');
+        });
       } else if (req.url === '/stream') {
         res.writeHead(200, {
           'Content-Type': 'text/event-stream',
@@ -131,26 +179,67 @@ export class ScreenViewer {
   <title>xdesk - Remote Desktop</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0f0f0f;
-      color: #fff;
-      height: 100vh;
-      overflow: hidden;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f0f0f; color: #fff; height: 100vh; overflow: hidden; }
     .app { display: flex; flex-direction: column; height: 100vh; }
+    
+    /* 连接页面 */
+    .connect-page {
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%);
+    }
+    .connect-card {
+      background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px;
+      padding: 40px; width: 400px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .connect-logo {
+      width: 60px; height: 60px; margin: 0 auto 20px;
+      background: linear-gradient(135deg, #4f9cf7, #8b5cf6);
+      border-radius: 16px; display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .connect-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .connect-subtitle { font-size: 14px; color: #888; margin-bottom: 32px; }
+    .my-id-section { margin-bottom: 32px; }
+    .my-id-label { font-size: 12px; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .my-id-value {
+      font-size: 32px; font-weight: 700; font-family: monospace; color: #4f9cf7;
+      letter-spacing: 4px; padding: 16px; background: #0f0f0f; border-radius: 12px;
+      border: 1px solid #2a2a2a;
+    }
+    .connect-input-section { margin-bottom: 24px; }
+    .connect-input-label { font-size: 12px; color: #666; margin-bottom: 8px; text-align: left; }
+    .connect-input-row { display: flex; gap: 8px; }
+    #connect-id {
+      flex: 1; padding: 14px 16px; background: #0f0f0f; border: 1px solid #2a2a2a;
+      border-radius: 10px; color: #fff; font-size: 18px; font-family: monospace;
+      letter-spacing: 2px; outline: none;
+    }
+    #connect-id:focus { border-color: #4f9cf7; }
+    #connect-id::placeholder { color: #444; letter-spacing: 1px; }
+    .btn-connect {
+      padding: 14px 24px; background: linear-gradient(135deg, #4f9cf7, #8b5cf6);
+      border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-connect:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79, 156, 247, 0.3); }
+    .btn-connect:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .connect-hint { font-size: 12px; color: #555; margin-top: 16px; }
+    
+    /* 远程桌面页面 */
+    .remote-page { display: none; flex-direction: column; height: 100vh; }
+    .remote-page.active { display: flex; }
+    .connect-page.hidden { display: none; }
+    
     .header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 8px 16px; background: #1a1a1a; border-bottom: 1px solid #2a2a2a;
     }
-    .logo { display: flex; align-items: center; gap: 10px; }
-    .logo-icon {
-      width: 28px; height: 28px;
-      background: linear-gradient(135deg, #4f9cf7, #8b5cf6);
-      border-radius: 6px; display: flex; align-items: center; justify-content: center;
-    }
-    .logo-text { font-size: 16px; font-weight: 600; }
-    .logo-badge { font-size: 10px; padding: 2px 8px; background: #4f9cf7; color: white; border-radius: 20px; }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .btn-back { background: transparent; border: none; color: #888; cursor: pointer; font-size: 18px; padding: 4px 8px; }
+    .btn-back:hover { color: #fff; }
+    .peer-info { font-size: 13px; color: #888; }
+    .peer-info span { color: #4f9cf7; font-family: monospace; }
     .stats { display: flex; gap: 16px; align-items: center; }
     .stat { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #888; }
     .stat-value { font-weight: 600; color: #22c55e; font-family: monospace; }
@@ -167,7 +256,7 @@ export class ScreenViewer {
     #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
     .screen-badge { position: absolute; top: 10px; left: 10px; padding: 4px 10px; background: rgba(0,0,0,0.6); border-radius: 20px; font-size: 11px; display: flex; align-items: center; gap: 6px; }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
-    .sidebar { width: 360px; background: #1a1a1a; border-left: 1px solid #2a2a2a; display: flex; flex-direction: column; }
+    .sidebar { width: 320px; background: #1a1a1a; border-left: 1px solid #2a2a2a; display: flex; flex-direction: column; }
     .sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #2a2a2a; }
     .sidebar-title { font-size: 13px; font-weight: 600; }
     .terminal { flex: 1; display: flex; flex-direction: column; background: #111; margin: 10px; border-radius: 8px; border: 1px solid #2a2a2a; overflow: hidden; }
@@ -190,12 +279,36 @@ export class ScreenViewer {
   </style>
 </head>
 <body>
-  <div class="app">
+  <!-- 连接页面 -->
+  <div class="connect-page" id="connectPage">
+    <div class="connect-card">
+      <div class="connect-logo">🖥</div>
+      <div class="connect-title">xdesk</div>
+      <div class="connect-subtitle">Remote Desktop</div>
+      
+      <div class="my-id-section">
+        <div class="my-id-label">Your ID</div>
+        <div class="my-id-value" id="myId">Loading...</div>
+      </div>
+      
+      <div class="connect-input-section">
+        <div class="connect-input-label">Remote ID</div>
+        <div class="connect-input-row">
+          <input type="text" id="connect-id" placeholder="123-456-789" maxlength="11" autocomplete="off">
+          <button class="btn-connect" id="btnConnect" onclick="doConnect()">Connect</button>
+        </div>
+      </div>
+      
+      <div class="connect-hint">Enter 9-digit ID to connect</div>
+    </div>
+  </div>
+
+  <!-- 远程桌面页面 -->
+  <div class="remote-page" id="remotePage">
     <header class="header">
-      <div class="logo">
-        <div class="logo-icon">🖥</div>
-        <span class="logo-text">xdesk</span>
-        <span class="logo-badge">Remote</span>
+      <div class="header-left">
+        <button class="btn-back" onclick="disconnect()">←</button>
+        <div class="peer-info">Connected to: <span id="peerId">-</span></div>
       </div>
       <div class="stats">
         <div class="stat"><div class="stat-dot"></div><span>FPS</span><span class="stat-value" id="fps">0</span></div>
@@ -248,6 +361,7 @@ export class ScreenViewer {
       </div>
     </footer>
   </div>
+
   <script>
     var img = document.getElementById('screen');
     var overlay = document.getElementById('overlay');
@@ -262,128 +376,110 @@ export class ScreenViewer {
     var bwEl = document.getElementById('bandwidth');
     var upEl = document.getElementById('uptime');
     var sidebar = document.getElementById('sidebar');
+    var connectPage = document.getElementById('connectPage');
+    var remotePage = document.getElementById('remotePage');
+    var myIdEl = document.getElementById('myId');
+    var peerIdEl = document.getElementById('peerId');
+    var connectIdEl = document.getElementById('connect-id');
     var frames = 0, lastSec = Date.now(), lastFrame = Date.now();
     var lastOut = '', startTime = Date.now(), lastBw = Date.now(), bytes = 0;
+    var remoteWidth = 1920, remoteHeight = 1080;
 
-    // 存储远程屏幕的实际分辨率
-    var remoteWidth = 1920;
-    var remoteHeight = 1080;
+    // 获取我的 ID
+    fetch('/api/id').then(function(r) { return r.json(); }).then(function(d) {
+      myIdEl.textContent = formatId(d.id);
+    });
 
-    // 图片加载完成后更新分辨率
+    // 格式化 ID
+    function formatId(id) {
+      if (id && id.length >= 9) {
+        return id.substring(0,3) + '-' + id.substring(3,6) + '-' + id.substring(6,9);
+      }
+      return id || '...';
+    }
+
+    // 连接
+    function doConnect() {
+      var id = connectIdEl.value.replace(/[^0-9]/g, '');
+      if (id.length < 9) {
+        alert('Please enter 9-digit ID');
+        return;
+      }
+      
+      fetch('/api/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ peerId: id })
+      });
+      
+      peerIdEl.textContent = formatId(id);
+      connectPage.classList.add('hidden');
+      remotePage.classList.add('active');
+    }
+
+    // 断开连接
+    function disconnect() {
+      connectPage.classList.remove('hidden');
+      remotePage.classList.remove('active');
+    }
+
+    // Enter 键连接
+    connectIdEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doConnect();
+    });
+
+    // 自动格式化输入
+    connectIdEl.addEventListener('input', function(e) {
+      var v = this.value.replace(/[^0-9]/g, '');
+      if (v.length > 9) v = v.substring(0, 9);
+      if (v.length > 6) v = v.substring(0,3) + '-' + v.substring(3,6) + '-' + v.substring(6);
+      else if (v.length > 3) v = v.substring(0,3) + '-' + v.substring(3);
+      this.value = v;
+    });
+
     img.onload = function() {
       remoteWidth = img.naturalWidth;
       remoteHeight = img.naturalHeight;
       resEl.textContent = remoteWidth + 'x' + remoteHeight;
     };
 
-    /**
-     * 坐标转换：网页鼠标位置 -> 远程屏幕坐标
-     * 
-     * 需要考虑的因素：
-     * 1. overlay 元素的位置和大小
-     * 2. 图像在 overlay 中的显示区域（object-fit: contain 会留黑边）
-     * 3. 远程屏幕的实际分辨率
-     */
     function getCoords(e) {
-      var overlayRect = overlay.getBoundingClientRect();
-      
-      // 鼠标相对于 overlay 左上角的像素位置
-      var mouseX = e.clientX - overlayRect.left;
-      var mouseY = e.clientY - overlayRect.top;
-      
-      // overlay 的显示尺寸
-      var overlayW = overlayRect.width;
-      var overlayH = overlayRect.height;
-      
-      // 计算图像在 overlay 中的实际显示区域（考虑 object-fit: contain）
+      var rect = overlay.getBoundingClientRect();
+      var mouseX = e.clientX - rect.left;
+      var mouseY = e.clientY - rect.top;
+      var overlayW = rect.width;
+      var overlayH = rect.height;
       var imgAspect = remoteWidth / remoteHeight;
       var overlayAspect = overlayW / overlayH;
-      
       var displayW, displayH, offsetX, offsetY;
       
       if (imgAspect > overlayAspect) {
-        // 图像更宽，以宽度为准，上下有黑边
-        displayW = overlayW;
-        displayH = overlayW / imgAspect;
-        offsetX = 0;
-        offsetY = (overlayH - displayH) / 2;
+        displayW = overlayW; displayH = overlayW / imgAspect; offsetX = 0; offsetY = (overlayH - displayH) / 2;
       } else {
-        // 图像更高，以高度为准，左右有黑边
-        displayH = overlayH;
-        displayW = overlayH * imgAspect;
-        offsetX = (overlayW - displayW) / 2;
-        offsetY = 0;
+        displayH = overlayH; displayW = overlayH * imgAspect; offsetX = (overlayW - displayW) / 2; offsetY = 0;
       }
       
-      // 鼠标相对于图像显示区域的位置
-      var imgX = mouseX - offsetX;
-      var imgY = mouseY - offsetY;
-      
-      // 转换为 0-1 的比例
-      var relX = imgX / displayW;
-      var relY = imgY / displayH;
-      
-      // 限制在 0-1 范围内
-      relX = Math.max(0, Math.min(1, relX));
-      relY = Math.max(0, Math.min(1, relY));
-      
-      // 转换为远程屏幕坐标
-      var x = Math.round(relX * remoteWidth);
-      var y = Math.round(relY * remoteHeight);
-      
-      // 更新坐标显示
+      var x = Math.max(0, Math.min(remoteWidth, Math.round((mouseX - offsetX) / displayW * remoteWidth)));
+      var y = Math.max(0, Math.min(remoteHeight, Math.round((mouseY - offsetY) / displayH * remoteHeight)));
       coordsEl.textContent = x + ',' + y;
-      
       return { x: x, y: y };
     }
 
     function sendInput(d) {
-      fetch('/input', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(d)
-      });
+      fetch('/input', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
     }
 
-    // 鼠标移动
-    overlay.addEventListener('mousemove', function(e) {
-      var p = getCoords(e);
-      sendInput({ action: 'mousemove', x: p.x, y: p.y });
-    });
-
-    // 鼠标按下
-    overlay.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      var p = getCoords(e);
-      var button = e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle';
-      sendInput({ action: 'mouseclick', x: p.x, y: p.y, button: button });
-    });
-
-    // 鼠标释放
-    overlay.addEventListener('mouseup', function(e) {
-      e.preventDefault();
-      var p = getCoords(e);
-      var button = e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle';
-      sendInput({ action: 'mouseup', x: p.x, y: p.y, button: button });
-    });
-
-    // 滚轮
-    overlay.addEventListener('wheel', function(e) {
-      e.preventDefault();
-      sendInput({ action: 'mousescroll', x: 0, y: 0, direction: e.deltaY < 0 ? 'up' : 'down' });
-    });
-
-    // 禁用右键菜单
+    overlay.addEventListener('mousemove', function(e) { var p = getCoords(e); sendInput({ action: 'mousemove', x: p.x, y: p.y }); });
+    overlay.addEventListener('mousedown', function(e) { e.preventDefault(); var p = getCoords(e); sendInput({ action: 'mouseclick', x: p.x, y: p.y, button: e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle' }); });
+    overlay.addEventListener('wheel', function(e) { e.preventDefault(); sendInput({ action: 'mousescroll', x: 0, y: 0, direction: e.deltaY < 0 ? 'up' : 'down' }); });
     overlay.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
-    // 键盘事件
     document.addEventListener('keydown', function(e) {
-      if (e.target === cmdEl) return;
+      if (e.target === cmdEl || e.target === connectIdEl) return;
       e.preventDefault();
       sendInput({ action: 'keypress', key: e.key });
     });
 
-    // 终端输入
     cmdEl.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         var c = cmdEl.value.trim();
@@ -397,33 +493,23 @@ export class ScreenViewer {
       e.stopPropagation();
     });
 
-    // 轮询 Shell 输出
     setInterval(function() {
       fetch('/shell-output').then(function(r) { return r.text(); }).then(function(t) {
         if (t !== lastOut) { outEl.textContent = t; outEl.scrollTop = outEl.scrollHeight; lastOut = t; }
       }).catch(function() {});
     }, 300);
 
-    // SSE 连接
     var pendingFrame = null;
-    var rendering = false;
-
     function renderFrame() {
-      if (pendingFrame && !rendering) {
-        rendering = true;
+      if (pendingFrame) {
         var now = Date.now();
         latEl.textContent = Math.min(now - lastFrame, 999) + 'ms';
         lastFrame = now;
         img.src = 'data:image/jpeg;base64,' + pendingFrame;
         bytes += pendingFrame.length;
         frames++;
-        if (now - lastSec >= 1000) {
-          fpsEl.textContent = frames;
-          frames = 0;
-          lastSec = now;
-        }
+        if (now - lastSec >= 1000) { fpsEl.textContent = frames; frames = 0; lastSec = now; }
         pendingFrame = null;
-        rendering = false;
       }
       requestAnimationFrame(renderFrame);
     }
@@ -431,50 +517,23 @@ export class ScreenViewer {
 
     function connect() {
       var es = new EventSource('/stream');
-      es.onopen = function() {
-        statusEl.textContent = 'Connected';
-        connEl.textContent = 'Connected';
-        document.querySelector('.badge-dot').style.background = '#22c55e';
-      };
-      es.onmessage = function(e) {
-        pendingFrame = e.data;
-      };
-      es.onerror = function() {
-        statusEl.textContent = 'Reconnecting...';
-        connEl.textContent = 'Reconnecting';
-        document.querySelector('.badge-dot').style.background = '#f59e0b';
-        es.close();
-        setTimeout(connect, 2000);
-      };
+      es.onopen = function() { statusEl.textContent = 'Connected'; connEl.textContent = 'Connected'; };
+      es.onmessage = function(e) { pendingFrame = e.data; };
+      es.onerror = function() { statusEl.textContent = 'Reconnecting...'; es.close(); setTimeout(connect, 2000); };
     }
+    connect();
 
-    // 统计更新
     function updateStats() {
       var now = Date.now();
       var el = Math.floor((now - startTime) / 1000);
-      var h = String(Math.floor(el / 3600)).padStart(2, '0');
-      var m = String(Math.floor((el % 3600) / 60)).padStart(2, '0');
-      var s = String(el % 60).padStart(2, '0');
-      upEl.textContent = h + ':' + m + ':' + s;
+      upEl.textContent = String(Math.floor(el/3600)).padStart(2,'0') + ':' + String(Math.floor((el%3600)/60)).padStart(2,'0') + ':' + String(el%60).padStart(2,'0');
       var be = (now - lastBw) / 1000;
-      if (be >= 1) {
-        bwEl.textContent = Math.round(bytes / be / 1024) + ' KB/s';
-        bytes = 0;
-        lastBw = now;
-      }
+      if (be >= 1) { bwEl.textContent = Math.round(bytes/be/1024) + ' KB/s'; bytes = 0; lastBw = now; }
     }
     setInterval(updateStats, 1000);
 
-    function toggleSidebar() {
-      sidebar.style.display = sidebar.style.display === 'none' ? 'flex' : 'none';
-    }
-
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-      else document.exitFullscreen();
-    }
-
-    connect();
+    function toggleSidebar() { sidebar.style.display = sidebar.style.display === 'none' ? 'flex' : 'none'; }
+    function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
   </script>
 </body>
 </html>`;
