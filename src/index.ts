@@ -218,7 +218,7 @@ async function main() {
 
   capture.stop();
   input.stop();
-  if (viewerStarted) viewer.stop();
+  viewer.stop();
   client.disconnect();
   rl.close();
 }
