@@ -5,8 +5,7 @@ import { ScreenViewer } from './viewer';
 import { executeCommand } from './shell';
 import { FFmpegCapture } from './ffmpeg-capture';
 import { InputController } from './input';
-
-const SIGNAL_URL = 'wss://xdesk.ctoocn.workers.dev/ws?room=test';
+import { loadConfig, Config } from './config';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -15,20 +14,39 @@ const rl = readline.createInterface({
 
 function prompt(prefix: string): Promise<string> {
   return new Promise(resolve => {
-    rl.question(`${prefix}> `, resolve);
+    rl.question(prefix + '> ', resolve);
   });
 }
 
-async function main(proxyUrl?: string) {
-  const client = new SignalClient(SIGNAL_URL, proxyUrl);
-  const capture = new FFmpegCapture(0, 0, 15, 3);
+async function main() {
+  // Load config
+  const config = loadConfig();
+  
+  // Override with command line args
+  const args = process.argv.slice(2);
+  if (args[0]) config.proxy = args[0];
+  
+  const signalUrl = config.signal_server + '?room=' + config.room;
+  
+  console.log('');
+  console.log('========================================');
+  console.log('  xdesk - Remote Desktop');
+  console.log('========================================');
+  console.log('  Server: ' + config.signal_server);
+  console.log('  Room: ' + config.room);
+  console.log('  FPS: ' + config.fps);
+  console.log('========================================');
+  console.log('');
+
+  const client = new SignalClient(signalUrl, config.proxy || undefined);
+  const capture = new FFmpegCapture(0, 0, config.fps, config.quality);
   const viewer = new ScreenViewer(8080);
   const input = new InputController();
   
   try {
     await client.connect();
   } catch (e) {
-    console.log('Failed to connect');
+    console.log('Failed to connect to: ' + signalUrl);
     rl.close();
     return;
   }
@@ -37,10 +55,7 @@ async function main(proxyUrl?: string) {
 
   const clientId = client.getClientId();
   if (clientId) {
-    console.log('');
-    console.log('========================================');
-    console.log(`  Your ID: ${clientId}`);
-    console.log('========================================');
+    console.log('Your ID: ' + clientId);
     console.log('');
   }
 
@@ -50,12 +65,9 @@ async function main(proxyUrl?: string) {
   let lastFpsTime = Date.now();
   let currentFps = 0;
 
-  // Start input controller
   input.start();
 
-  // Handle incoming messages
   client.onMessage((msg: SignalMessage) => {
-    // Screen frame received
     if (msg.type === 'screen' && msg.data?.frame) {
       if (!viewerStarted) {
         viewer.start();
@@ -69,13 +81,12 @@ async function main(proxyUrl?: string) {
         currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
         frameCount = 0;
         lastFpsTime = now;
-        process.stdout.write(`\r[FPS: ${currentFps}] `);
+        process.stdout.write('\r[FPS: ' + currentFps + '] ');
       }
     }
 
-    // Screen request received - start sharing
     if (msg.type === 'screen-request' && msg.id) {
-      console.log(`[SHARE] ${msg.id} requested screen`);
+      console.log('[SHARE] ' + msg.id + ' requested screen');
       targetPeer = msg.id;
       capture.start((frame) => {
         if (!targetPeer) return;
@@ -87,67 +98,49 @@ async function main(proxyUrl?: string) {
       });
     }
 
-    // Input event received - execute locally
     if (msg.type === 'input' && msg.data) {
       const { action, x, y, button, key, text, direction } = msg.data;
       switch (action) {
-        case 'mousemove':
-          input.mouseMove(x, y);
-          break;
-        case 'mouseclick':
-          input.mouseClick(x, y, button);
-          break;
-        case 'mousescroll':
-          input.mouseScroll(x, y, direction);
-          break;
-        case 'keypress':
-          input.keyPress(key);
-          break;
-        case 'typetext':
-          input.typeText(text);
-          break;
+        case 'mousemove': input.mouseMove(x, y); break;
+        case 'mouseclick': input.mouseClick(x, y, button); break;
+        case 'mousescroll': input.mouseScroll(x, y, direction); break;
+        case 'keypress': input.keyPress(key); break;
+        case 'typetext': input.typeText(text); break;
       }
     }
 
-    // Shell output received
     if (msg.type === 'shell-output' && msg.data?.output) {
       viewer.appendShellOutput(msg.data.output);
     }
 
-    // Shell command received - execute
     if (msg.type === 'shell' && msg.data?.command && msg.id) {
-      console.log(`[SHELL] ${msg.data.command}`);
+      console.log('[SHELL] ' + msg.data.command);
       executeCommand(msg.data.command).then(output => {
         client.send({ type: 'shell-output', to: msg.id!, data: { output } });
       });
     }
   });
 
-  // Input callback from viewer (browser)
   viewer.setInputCallback((action: string, data: any) => {
     if (!targetPeer) return;
-    client.send({
-      type: 'input',
-      to: targetPeer,
-      data: { action, ...data }
-    });
+    client.send({ type: 'input', to: targetPeer, data: { action, ...data } });
   });
 
-  // Shell callback from viewer
   viewer.setShellCallback((command) => {
     if (!targetPeer) {
       viewer.appendShellOutput('Error: No peer connected\n');
       return;
     }
-    console.log(`[SHELL] ${command}`);
+    console.log('[SHELL] ' + command);
     client.send({ type: 'shell', to: targetPeer, data: { command } });
   });
 
   console.log('Commands:');
   console.log('  connect <id>  - Connect to peer');
-  console.log('  view          - View remote screen');
+  console.log('  peers         - List online peers');
   console.log('  share         - Share your screen');
   console.log('  stop          - Stop sharing');
+  console.log('  config        - Show config');
   console.log('  quit          - Exit');
   console.log('');
 
@@ -162,18 +155,19 @@ async function main(proxyUrl?: string) {
           console.log('Usage: connect <peer-id>');
         } else {
           targetPeer = parts[1];
-          console.log(`Connected to: ${targetPeer}`);
-          client.send({ type: 'screen-request', to: targetPeer, data: { fps: 60 } });
+          console.log('Connected to: ' + targetPeer);
+          client.send({ type: 'screen-request', to: targetPeer, data: { fps: config.fps } });
           console.log('Requesting screen...');
         }
         break;
 
-      case 'view':
-        if (!targetPeer) {
-          console.log('No peer. Use: connect <id>');
+      case 'peers':
+        const peers = client.getPeers();
+        if (peers.length === 0) {
+          console.log('No peers online');
         } else {
-          client.send({ type: 'screen-request', to: targetPeer, data: { fps: 60 } });
-          console.log('Requesting screen...');
+          console.log('Online peers:');
+          peers.forEach(p => console.log('  ' + p));
         }
         break;
 
@@ -194,18 +188,12 @@ async function main(proxyUrl?: string) {
         console.log('Stopped sharing');
         break;
 
-      case 'peers':
-        const peers = client.getPeers();
-        if (peers.length === 0) {
-          console.log('No peers online');
-        } else {
-          console.log('Online peers:');
-          peers.forEach(p => console.log(`  ${p}`));
-        }
+      case 'config':
+        console.log(JSON.stringify(config, null, 2));
         break;
 
       default:
-        if (input) console.log('Unknown command');
+        if (inputCmd.trim()) console.log('Unknown command');
     }
   }
 
@@ -216,8 +204,4 @@ async function main(proxyUrl?: string) {
   rl.close();
 }
 
-console.log('=== xdesk Remote Desktop ===');
-console.log('');
-
-const proxy = process.argv[2];
-main(proxy).catch(console.error);
+main().catch(console.error);

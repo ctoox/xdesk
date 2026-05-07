@@ -70,7 +70,141 @@ npm start
 | `peers` | 查看在线列表 |
 | `share` | 分享你的屏幕 |
 | `stop` | 停止分享 |
+| `config` | 显示当前配置 |
 | `quit` | 退出程序 |
+
+## 配置
+
+### 配置文件
+
+创建 `xdesk.json` 或 `~/.xdesk/config.json`：
+
+```json
+{
+  "signal_server": "wss://xdesk.ctoocn.workers.dev/ws",
+  "room": "myroom",
+  "fps": 15,
+  "quality": 3,
+  "proxy": null
+}
+```
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `signal_server` | 信令服务器地址 | `wss://xdesk.ctoocn.workers.dev/ws` |
+| `room` | 房间名 | `default` |
+| `fps` | 帧率 | `15` |
+| `quality` | JPEG 质量 (1-31) | `3` |
+| `proxy` | 代理地址 | `null` |
+
+### 自定义信令服务器
+
+如果要使用自己的信令服务器：
+
+1. 部署 Cloudflare Worker（见下方）
+2. 修改配置文件中的 `signal_server`
+3. 重启 xdesk
+
+## 自部署信令服务器
+
+### 1. 创建 Cloudflare Worker
+
+```bash
+# 安装 Wrangler CLI
+npm install -g wrangler
+
+# 登录 Cloudflare
+wrangler login
+```
+
+### 2. Worker 代码
+
+创建 `worker.js`：
+
+```javascript
+export class Room {
+  constructor(state, env) {
+    this.state = state;
+    this.clients = new Map();
+  }
+
+  async fetch(request) {
+    if (request.headers.get("Upgrade") !== "websocket") {
+      return new Response("xdesk signal server", { status: 200 });
+    }
+
+    const pair = new WebSocketPair();
+    const [client, server] = Object.values(pair);
+    server.accept();
+
+    const clientId = crypto.randomUUID();
+    this.clients.set(clientId, server);
+
+    server.send(JSON.stringify({ type: "id", id: clientId }));
+
+    server.addEventListener("message", (event) => {
+      let msg;
+      try {
+        msg = JSON.parse(event.data);
+      } catch {
+        return;
+      }
+
+      msg.id = clientId;
+
+      if (msg.to && this.clients.has(msg.to)) {
+        this.clients.get(msg.to).send(JSON.stringify(msg));
+      }
+
+      if (!msg.to) {
+        for (const [id, c] of this.clients) {
+          if (id !== clientId) {
+            c.send(JSON.stringify(msg));
+          }
+        }
+      }
+    });
+
+    server.addEventListener("close", () => {
+      this.clients.delete(clientId);
+    });
+
+    return new Response(null, { status: 101, webSocket: client });
+  }
+}
+```
+
+### 3. 配置 wrangler.toml
+
+```toml
+name = "xdesk-signal"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[durable_objects]
+bindings = [{ name = "ROOM", class_name = "Room" }]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["Room"]
+```
+
+### 4. 部署
+
+```bash
+wrangler deploy
+```
+
+### 5. 使用自定义服务器
+
+创建 `xdesk.json`：
+
+```json
+{
+  "signal_server": "wss://xdesk-signal.your-account.workers.dev/ws",
+  "room": "myroom"
+}
+```
 
 ## 架构
 

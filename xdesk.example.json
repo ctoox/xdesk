@@ -1,0 +1,10 @@
+# xdesk 配置文件
+# 将此文件保存为 xdesk.json 或放在 ~/.xdesk/config.json
+
+{
+  "signal_server": "wss://xdesk.ctoocn.workers.dev/ws?room=test",
+  "room": "default",
+  "fps": 15,
+  "quality": 3,
+  "proxy": null
+}
