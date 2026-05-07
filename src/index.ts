@@ -144,12 +144,13 @@ async function main() {
   viewer.openBrowser();
 
   console.log('Commands:');
-  console.log('  connect <id>  - Connect to peer');
-  console.log('  peers         - List online peers');
-  console.log('  share         - Share your screen');
-  console.log('  stop          - Stop sharing');
-  console.log('  calibrate x y - Set mouse offset');
-  console.log('  quit          - Exit');
+  console.log('  connect <id>      - Connect to peer');
+  console.log('  peers             - List online peers');
+  console.log('  share             - Share your screen');
+  console.log('  stop              - Stop sharing');
+  console.log('  calibrate x y     - Set mouse offset');
+  console.log('  calibrate-reset   - Reset mouse offset');
+  console.log('  quit              - Exit');
   console.log('');
   console.log('Or use the web interface at http://localhost:8080');
   console.log('');
@@ -221,6 +222,11 @@ async function main() {
           input.calibrate(offsetX, offsetY);
           console.log('Calibration set: offset=(' + offsetX + ', ' + offsetY + ')');
         }
+        break;
+
+      case 'calibrate-reset':
+        input.calibrateReset();
+        console.log('Calibration reset to (0, 0)');
         break;
 
       case 'config':

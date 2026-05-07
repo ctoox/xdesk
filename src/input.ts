@@ -87,6 +87,10 @@ export class InputController {
     this.send('calibrate ' + offsetX + ' ' + offsetY);
   }
 
+  calibrateReset(): void {
+    this.send('calibrate-reset');
+  }
+
   stop(): void {
     if (this.process) {
       this.send('quit');

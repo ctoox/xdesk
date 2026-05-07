@@ -339,6 +339,13 @@ fn main() {
                     }
                 }
             }
+            "calibrate-reset" => {
+                unsafe {
+                    OFFSET_X = 0;
+                    OFFSET_Y = 0;
+                    eprintln!("[CALIBRATE] reset to (0, 0)");
+                }
+            }
             "quit" => break,
             _ => {}
         }
