@@ -289,7 +289,7 @@ export class ScreenViewer {
     .screen-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .screen-frame { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.6); }
     #screen { display: block; max-width: 100%; max-height: calc(100vh - 100px); object-fit: contain; background: #000; }
-    #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+    #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: none; }
     .screen-badge { position: absolute; top: 10px; left: 10px; padding: 4px 10px; background: rgba(0,0,0,0.6); border-radius: 20px; font-size: 11px; display: flex; align-items: center; gap: 6px; }
     .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
     .sidebar { width: 320px; background: #1a1a1a; border-left: 1px solid #2a2a2a; display: flex; flex-direction: column; }
