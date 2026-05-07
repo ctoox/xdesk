@@ -15,6 +15,7 @@ export class ScreenViewer {
   private onShell: ShellCallback | null = null;
   private onInput: InputCallback | null = null;
   private shellOutput: string = '';
+  private pendingUpdate: boolean = false;
 
   constructor(port: number = 8080) {
     this.port = port;
@@ -43,7 +44,16 @@ export class ScreenViewer {
       if (req.url === '/' || req.url === '/index.html') {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(this.getHtml());
+      } else if (req.url === '/frame') {
+        // Polling endpoint - returns latest frame only
+        res.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache'
+        });
+        res.end(JSON.stringify({ frame: this.currentFrame, fps: this.currentFps }));
       } else if (req.url === '/stream') {
+        // Keep for compatibility but not used
         res.writeHead(200, {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
@@ -51,7 +61,6 @@ export class ScreenViewer {
           'Access-Control-Allow-Origin': '*'
         });
         this.clients.add(res);
-        if (this.currentFrame) res.write('data: ' + this.currentFrame + '\n\n');
         req.on('close', () => { this.clients.delete(res); });
       } else if (req.url === '/input' && req.method === 'POST') {
         let body = '';
@@ -102,10 +111,17 @@ export class ScreenViewer {
   }
 
   updateFrame(frameBase64: string): void {
+    // Just update current frame, don't queue
     this.currentFrame = frameBase64;
     this.frameCount++;
+    
+    // Notify SSE clients (for compatibility)
     for (const client of this.clients) {
-      try { client.write('data: ' + frameBase64 + '\n\n'); } catch (e) { this.clients.delete(client); }
+      try { 
+        client.write('data: ' + frameBase64 + '\n\n'); 
+      } catch (e) { 
+        this.clients.delete(client); 
+      }
     }
   }
 
@@ -136,7 +152,7 @@ export class ScreenViewer {
       display: flex;\
       align-items: center;\
       justify-content: space-between;\
-      padding: 10px 16px;\
+      padding: 8px 16px;\
       background: #1a1a1a;\
       border-bottom: 1px solid #2a2a2a;\
     }\
@@ -154,7 +170,7 @@ export class ScreenViewer {
       background: #4f9cf7; color: white;\
       border-radius: 20px; font-weight: 500;\
     }\
-    .stats { display: flex; gap: 20px; align-items: center; }\
+    .stats { display: flex; gap: 16px; align-items: center; }\
     .stat { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #888; }\
     .stat-value { font-weight: 600; color: #22c55e; font-family: monospace; }\
     .stat-dot {\
@@ -192,7 +208,7 @@ export class ScreenViewer {
     }\
     .sidebar-header {\
       display: flex; align-items: center; justify-content: space-between;\
-      padding: 12px 16px; border-bottom: 1px solid #2a2a2a;\
+      padding: 10px 16px; border-bottom: 1px solid #2a2a2a;\
     }\
     .sidebar-title { font-size: 13px; font-weight: 600; }\
     .terminal {\
@@ -308,6 +324,7 @@ export class ScreenViewer {
     var sidebar = document.getElementById("sidebar");\
     var frames = 0, lastSec = Date.now(), lastFrame = Date.now();\
     var lastOut = "", startTime = Date.now(), lastBw = Date.now(), bytes = 0;\
+    var lastPolledFrame = null;\
     \
     function sendInput(d) {\
       fetch("/input", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(d)});\
@@ -357,6 +374,26 @@ export class ScreenViewer {
         if (t!==lastOut) { outEl.textContent=t; outEl.scrollTop=outEl.scrollHeight; lastOut=t; }\
       }).catch(function(){});\
     }, 300);\
+    \
+    // Poll for latest frame - much faster than SSE\
+    function pollFrame() {\
+      fetch("/frame").then(function(r){return r.json();}).then(function(d) {\
+        if (d.frame && d.frame !== lastPolledFrame) {\
+          lastPolledFrame = d.frame;\
+          var now = Date.now();\
+          latEl.textContent = Math.min(now-lastFrame,999)+"ms";\
+          lastFrame = now;\
+          img.src = "data:image/jpeg;base64,"+d.frame;\
+          bytes += d.frame.length;\
+          frames++;\
+          if (now-lastSec>=1000) { fpsEl.textContent=frames; frames=0; lastSec=now; }\
+          if (img.naturalWidth) resEl.textContent = img.naturalWidth+"x"+img.naturalHeight;\
+        }\
+      }).catch(function(){});\
+    }\
+    // Poll every 16ms (~60fps)\
+    setInterval(pollFrame, 16);\
+    \
     function updateStats() {\
       var now = Date.now();\
       var el = Math.floor((now-startTime)/1000);\
@@ -376,22 +413,6 @@ export class ScreenViewer {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen();\
       else document.exitFullscreen();\
     }\
-    function connect() {\
-      var es = new EventSource("/stream");\
-      es.onopen = function() { statusEl.textContent="Connected"; connEl.textContent="Connected"; };\
-      es.onmessage = function(e) {\
-        var now = Date.now();\
-        latEl.textContent = Math.min(now-lastFrame,999)+"ms";\
-        lastFrame = now;\
-        img.src = "data:image/jpeg;base64,"+e.data;\
-        bytes += e.data.length;\
-        frames++;\
-        if (now-lastSec>=1000) { fpsEl.textContent=frames; frames=0; lastSec=now; }\
-        if (img.naturalWidth) resEl.textContent = img.naturalWidth+"x"+img.naturalHeight;\
-      };\
-      es.onerror = function() { statusEl.textContent="Reconnecting..."; connEl.textContent="Reconnecting"; es.close(); setTimeout(connect,2000); };\
-    }\
-    connect();\
   </script>\
 </body>\
 </html>';
