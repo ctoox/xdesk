@@ -58,7 +58,6 @@ async function main() {
   }
 
   let targetPeer: string | null = null;
-  let viewerStarted = false;
   let frameCount = 0;
   let lastFpsTime = Date.now();
   let currentFps = 0;
@@ -74,12 +73,6 @@ async function main() {
 
   client.onMessage((msg: SignalMessage) => {
     if (msg.type === 'screen' && msg.data?.frame) {
-      if (!viewerStarted) {
-        viewer.start();
-        viewer.openBrowser();
-        viewerStarted = true;
-        console.log('Screen viewer: http://localhost:8080');
-      }
       viewer.updateFrame(msg.data.frame);
       frameCount++;
       const now = Date.now();
