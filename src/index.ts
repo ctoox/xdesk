@@ -48,13 +48,11 @@ async function main() {
   await new Promise(resolve => setTimeout(resolve, 1000));
 
   const clientId = client.getClientId();
-  let shortId = '';
   
   if (clientId) {
-    shortId = clientId.substring(0, 9);
-    viewer.setMyId(shortId);
+    viewer.setMyId(clientId);
     console.log('========================================');
-    console.log('  Your ID: ' + formatId(shortId));
+    console.log('  Your ID: ' + formatId(clientId));
     console.log('========================================');
     console.log('');
   }
