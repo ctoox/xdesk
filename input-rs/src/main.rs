@@ -196,7 +196,7 @@ fn key_press(key: &str) {
             "scrolllock" => VK_SCROLL,
             "printscreen" | "prtsc" => VK_SNAPSHOT,
             "pause" => VK_PAUSE,
-            "apps" | "menu" => VK_APPS,
+            "apps" => VK_APPS,
             "+" | "=" => VK_OEM_PLUS,
             "-" => VK_OEM_MINUS,
             "," => VK_OEM_COMMA,
