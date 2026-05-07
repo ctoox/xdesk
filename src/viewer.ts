@@ -19,6 +19,8 @@ export class ScreenViewer {
   private onConnect: ConnectCallback | null = null;
   private shellOutput: string = '';
   private myId: string = '';
+  private captureWidth: number = 1920;
+  private captureHeight: number = 1080;
 
   constructor(port: number = 8080) {
     this.port = port;
@@ -38,6 +40,11 @@ export class ScreenViewer {
 
   setMyId(id: string): void {
     this.myId = id;
+  }
+
+  setCaptureSize(width: number, height: number): void {
+    this.captureWidth = width;
+    this.captureHeight = height;
   }
 
   appendShellOutput(data: string): void {
@@ -77,7 +84,7 @@ export class ScreenViewer {
         res.end(this.getHtml());
       } else if (req.url === '/api/id') {
         res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        res.end(JSON.stringify({ id: this.myId }));
+        res.end(JSON.stringify({ id: this.myId, width: this.captureWidth, height: this.captureHeight }));
       } else if (req.url === '/api/connect' && req.method === 'POST') {
         let body = '';
         req.on('data', (chunk) => body += chunk);
@@ -385,9 +392,14 @@ export class ScreenViewer {
     var lastOut = '', startTime = Date.now(), lastBw = Date.now(), bytes = 0;
     var remoteWidth = 1920, remoteHeight = 1080;
 
-    // 获取我的 ID
+    // 获取我的 ID 和分辨率
     fetch('/api/id').then(function(r) { return r.json(); }).then(function(d) {
       myIdEl.textContent = formatId(d.id);
+      if (d.width && d.height) {
+        remoteWidth = d.width;
+        remoteHeight = d.height;
+        console.log('Capture resolution: ' + remoteWidth + 'x' + remoteHeight);
+      }
     });
 
     // 格式化 ID
@@ -438,8 +450,8 @@ export class ScreenViewer {
     });
 
     img.onload = function() {
-      remoteWidth = img.naturalWidth;
-      remoteHeight = img.naturalHeight;
+      // 使用实际捕获分辨率，而不是图像尺寸
+      // remoteWidth 和 remoteHeight 已经在 setCaptureSize 中设置
       resEl.textContent = remoteWidth + 'x' + remoteHeight;
     };
 

@@ -18,9 +18,14 @@ fn mouse_move_to(x: i32, y: i32) {
         let vw = GetSystemMetrics(SM_CXVIRTUALSCREEN);
         let vh = GetSystemMetrics(SM_CYVIRTUALSCREEN);
         
+        // 调试输出
+        eprintln!("[MOUSE] input=({}, {}), virtual=({}, {}), size=({}, {})", x, y, vx, vy, vw, vh);
+        
         // 归一化到 0-65535 范围
         let nx = ((x - vx) as i64 * 65535 / vw as i64) as i32;
         let ny = ((y - vy) as i64 * 65535 / vh as i64) as i32;
+        
+        eprintln!("[MOUSE] normalized=({}, {})", nx, ny);
         
         let input = INPUT {
             r#type: INPUT_MOUSE,

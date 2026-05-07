@@ -137,6 +137,9 @@ async function main() {
   });
 
   // 启动 viewer 并打开浏览器
+  const res = capture.getResolution();
+  viewer.setCaptureSize(res.width, res.height);
+  console.log('Screen resolution: ' + res.width + 'x' + res.height);
   viewer.start();
   viewer.openBrowser();
 
