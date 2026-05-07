@@ -457,7 +457,16 @@ export class ScreenViewer {
         if (diff < minDiff) { minDiff = diff; closest = scales[i]; }
       }
       dpiScale = closest;
+      
+      var logicalW = Math.round(remoteWidth / dpiScale);
+      var logicalH = Math.round(remoteHeight / dpiScale);
+      
+      console.log('Physical: ' + remoteWidth + 'x' + remoteHeight);
       console.log('DPI scale: ' + (dpiScale * 100) + '%');
+      console.log('Logical: ' + logicalW + 'x' + logicalH);
+      
+      // 更新显示
+      resEl.textContent = logicalW + 'x' + logicalH + ' (' + (dpiScale * 100) + '%)';
     }
 
     function getCoords(e) {
@@ -466,6 +475,11 @@ export class ScreenViewer {
       var mouseY = e.clientY - rect.top;
       var overlayW = rect.width;
       var overlayH = rect.height;
+      
+      // 使用逻辑分辨率（物理分辨率 / DPI缩放）
+      var logicalW = Math.round(remoteWidth / dpiScale);
+      var logicalH = Math.round(remoteHeight / dpiScale);
+      
       var imgAspect = remoteWidth / remoteHeight;
       var overlayAspect = overlayW / overlayH;
       var displayW, displayH, offsetX, offsetY;
@@ -476,8 +490,9 @@ export class ScreenViewer {
         displayH = overlayH; displayW = overlayH * imgAspect; offsetX = (overlayW - displayW) / 2; offsetY = 0;
       }
       
-      var x = Math.max(0, Math.min(remoteWidth, Math.round((mouseX - offsetX) / displayW * remoteWidth)));
-      var y = Math.max(0, Math.min(remoteHeight, Math.round((mouseY - offsetY) / displayH * remoteHeight)));
+      // 映射到逻辑分辨率
+      var x = Math.max(0, Math.min(logicalW, Math.round((mouseX - offsetX) / displayW * logicalW)));
+      var y = Math.max(0, Math.min(logicalH, Math.round((mouseY - offsetY) / displayH * logicalH)));
       coordsEl.textContent = x + ',' + y;
       return { x: x, y: y };
     }
