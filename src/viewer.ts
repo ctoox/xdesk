@@ -509,7 +509,8 @@ export class ScreenViewer {
     }
 
     overlay.addEventListener('mousemove', function(e) { var p = getCoords(e); sendInput({ action: 'mousemove', x: p.x, y: p.y }); });
-    overlay.addEventListener('mousedown', function(e) { e.preventDefault(); var p = getCoords(e); sendInput({ action: 'mouseclick', x: p.x, y: p.y, button: e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle' }); });
+    overlay.addEventListener('mousedown', function(e) { e.preventDefault(); var p = getCoords(e); sendInput({ action: 'mousedown', x: p.x, y: p.y, button: e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle' }); });
+    overlay.addEventListener('mouseup', function(e) { e.preventDefault(); var p = getCoords(e); sendInput({ action: 'mouseup', x: p.x, y: p.y, button: e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle' }); });
     overlay.addEventListener('wheel', function(e) { e.preventDefault(); sendInput({ action: 'mousescroll', x: 0, y: 0, direction: e.deltaY < 0 ? 'up' : 'down' }); });
     overlay.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
