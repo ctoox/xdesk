@@ -35,31 +35,30 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Setup Rust
+      - name: Setup Rust (Windows only)
+        if: runner.os == 'Windows'
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build Rust capture module
+      - name: Build Rust capture module (Windows only)
+        if: runner.os == 'Windows'
         run: |
           cd capture-rs
           cargo build --release
         shell: bash
 
-      - name: Build Rust input module
+      - name: Build Rust input module (Windows only)
+        if: runner.os == 'Windows'
         run: |
           cd input-rs
           cargo build --release
         shell: bash
 
-      - name: Copy Rust binaries
+      - name: Copy Rust binaries (Windows only)
+        if: runner.os == 'Windows'
         run: |
           mkdir -p bin
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            cp capture-rs/target/release/xdesk-capture.exe bin/
-            cp input-rs/target/release/xdesk-input.exe bin/
-          else
-            cp capture-rs/target/release/xdesk-capture bin/
-            cp input-rs/target/release/xdesk-input bin/
-          fi
+          cp capture-rs/target/release/xdesk-capture.exe bin/
+          cp input-rs/target/release/xdesk-input.exe bin/
         shell: bash
 
       - name: Install npm dependencies
