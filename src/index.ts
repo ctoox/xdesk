@@ -136,6 +136,12 @@ async function main() {
     client.send({ type: 'shell', to: targetPeer, data: { command } });
   });
 
+  viewer.setSettingsCallback((settings) => {
+    console.log('[SETTINGS] Update:', settings);
+    // TODO: Restart capture with new settings
+    // For now, just log the change
+  });
+
   // 启动 viewer 并打开浏览器
   const res = capture.getResolution();
   viewer.setCaptureSize(res.width, res.height);

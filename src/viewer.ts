@@ -5,6 +5,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 export type ShellCallback = (command: string) => void;
 export type InputCallback = (action: string, data: any) => void;
 export type ConnectCallback = (peerId: string) => void;
+export type SettingsCallback = (settings: { fps?: number; quality?: number }) => void;
 
 export class ScreenViewer {
   private server: http.Server | null = null;
@@ -17,9 +18,11 @@ export class ScreenViewer {
   private startTime: number = 0;
   private lastFpsUpdate: number = 0;
   private currentFps: number = 0;
+  private currentQuality: number = 5;
   private onShell: ShellCallback | null = null;
   private onInput: InputCallback | null = null;
   private onConnect: ConnectCallback | null = null;
+  private onSettings: SettingsCallback | null = null;
   private shellOutput: string = '';
   private myId: string = '';
   private captureWidth: number = 1920;
@@ -39,6 +42,10 @@ export class ScreenViewer {
 
   setConnectCallback(callback: ConnectCallback): void {
     this.onConnect = callback;
+  }
+
+  setSettingsCallback(callback: SettingsCallback): void {
+    this.onSettings = callback;
   }
 
   setMyId(id: string): void {
@@ -140,6 +147,22 @@ export class ScreenViewer {
       } else if (req.url === '/shell-output') {
         res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
         res.end(this.shellOutput);
+      } else if (req.url === '/api/settings' && req.method === 'GET') {
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        res.end(JSON.stringify({ fps: this.currentFps || 30, quality: this.currentQuality || 5 }));
+      } else if (req.url === '/api/settings' && req.method === 'POST') {
+        let body = '';
+        req.on('data', (chunk) => body += chunk);
+        req.on('end', () => {
+          try {
+            const settings = JSON.parse(body);
+            if (this.onSettings) {
+              this.onSettings(settings);
+            }
+          } catch (e) {}
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end('{"ok":true}');
+        });
       } else {
         res.writeHead(404);
         res.end('Not found');
@@ -285,6 +308,18 @@ export class ScreenViewer {
     .btn { padding: 6px 12px; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; }
     .btn-ghost { background: transparent; color: #888; border: 1px solid #333; }
     .btn-ghost:hover { background: #2a2a2a; color: #fff; }
+    .settings-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 24px; z-index: 1000; display: none; min-width: 300px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+    .settings-panel.active { display: block; }
+    .settings-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+    .settings-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .settings-label { font-size: 13px; color: #888; }
+    .settings-input { width: 80px; background: #111; border: 1px solid #333; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; text-align: center; }
+    .settings-input:focus { outline: none; border-color: #4f9cf7; }
+    .settings-btns { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+    .btn-primary { background: #4f9cf7; color: #fff; border: none; }
+    .btn-primary:hover { background: #3d8ae6; }
+    .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+    .overlay-bg.active { display: block; }
     .main { flex: 1; display: flex; overflow: hidden; }
     .screen-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .screen-frame { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.6); }
@@ -353,6 +388,7 @@ export class ScreenViewer {
         <div class="stat"><span>坐标</span><span class="stat-value coord-display" id="coords">0,0</span></div>
       </div>
       <div class="btns">
+        <button class="btn btn-ghost" onclick="toggleSettings()">Settings</button>
         <button class="btn btn-ghost" onclick="toggleSidebar()">Terminal</button>
         <button class="btn btn-ghost" onclick="toggleFullscreen()">Fullscreen</button>
       </div>
@@ -396,6 +432,24 @@ export class ScreenViewer {
         <div class="status-item">xdesk v1.0</div>
       </div>
     </footer>
+  </div>
+
+  <!-- 设置面板 -->
+  <div class="overlay-bg" id="overlayBg" onclick="toggleSettings()"></div>
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-title">Settings</div>
+    <div class="settings-row">
+      <span class="settings-label">FPS (1-60)</span>
+      <input type="number" id="settingsFps" class="settings-input" min="1" max="60" value="30">
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Quality (1-31)</span>
+      <input type="number" id="settingsQuality" class="settings-input" min="1" max="31" value="5">
+    </div>
+    <div class="settings-btns">
+      <button class="btn btn-ghost" onclick="toggleSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="applySettings()">Apply</button>
+    </div>
   </div>
 
   <script>
@@ -653,6 +707,43 @@ export class ScreenViewer {
 
     function toggleSidebar() { sidebar.style.display = sidebar.style.display === 'none' ? 'flex' : 'none'; }
     function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+    
+    // Settings panel
+    var settingsPanel = document.getElementById('settingsPanel');
+    var overlayBg = document.getElementById('overlayBg');
+    var settingsFps = document.getElementById('settingsFps');
+    var settingsQuality = document.getElementById('settingsQuality');
+    
+    function toggleSettings() {
+      var isActive = settingsPanel.classList.contains('active');
+      settingsPanel.classList.toggle('active');
+      overlayBg.classList.toggle('active');
+      if (!isActive) {
+        // Load current settings
+        fetch('/api/settings').then(function(r) { return r.json(); }).then(function(d) {
+          settingsFps.value = d.fps || 30;
+          settingsQuality.value = d.quality || 5;
+        }).catch(function() {});
+      }
+    }
+    
+    function applySettings() {
+      var fps = parseInt(settingsFps.value) || 30;
+      var quality = parseInt(settingsQuality.value) || 5;
+      fps = Math.max(1, Math.min(60, fps));
+      quality = Math.max(1, Math.min(31, quality));
+      
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fps: fps, quality: quality })
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.ok) {
+          toggleSettings();
+          console.log('Settings applied: fps=' + fps + ', quality=' + quality);
+        }
+      });
+    }
   </script>
 </body>
 </html>`;
