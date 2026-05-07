@@ -63,6 +63,14 @@ export class InputController {
     this.send('mouseclick ' + x + ' ' + y + ' ' + button);
   }
 
+  mouseDown(x: number, y: number, button: string = 'left'): void {
+    this.send('mousedown ' + x + ' ' + y + ' ' + button);
+  }
+
+  mouseUp(x: number, y: number, button: string = 'left'): void {
+    this.send('mouseup ' + x + ' ' + y + ' ' + button);
+  }
+
   mouseScroll(x: number, y: number, direction: string = 'down'): void {
     this.send('mousescroll ' + x + ' ' + y + ' ' + direction);
   }

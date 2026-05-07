@@ -46,6 +46,54 @@ fn mouse_move_to(x: i32, y: i32) {
     }
 }
 
+fn mouse_down(x: i32, y: i32, button: &str) {
+    mouse_move_to(x, y);
+    
+    unsafe {
+        let flag = match button {
+            "right" => MOUSEEVENTF_RIGHTDOWN,
+            "middle" => MOUSEEVENTF_MIDDLEDOWN,
+            _ => MOUSEEVENTF_LEFTDOWN,
+        };
+        
+        let input = INPUT {
+            r#type: INPUT_MOUSE,
+            Anonymous: INPUT_0 {
+                mi: MOUSEINPUT {
+                    dx: 0, dy: 0, mouseData: 0,
+                    dwFlags: flag, time: 0, dwExtraInfo: 0,
+                },
+            },
+        };
+        
+        SendInput(&[input], std::mem::size_of::<INPUT>() as i32);
+    }
+}
+
+fn mouse_up(x: i32, y: i32, button: &str) {
+    mouse_move_to(x, y);
+    
+    unsafe {
+        let flag = match button {
+            "right" => MOUSEEVENTF_RIGHTUP,
+            "middle" => MOUSEEVENTF_MIDDLEUP,
+            _ => MOUSEEVENTF_LEFTUP,
+        };
+        
+        let input = INPUT {
+            r#type: INPUT_MOUSE,
+            Anonymous: INPUT_0 {
+                mi: MOUSEINPUT {
+                    dx: 0, dy: 0, mouseData: 0,
+                    dwFlags: flag, time: 0, dwExtraInfo: 0,
+                },
+            },
+        };
+        
+        SendInput(&[input], std::mem::size_of::<INPUT>() as i32);
+    }
+}
+
 fn mouse_click(x: i32, y: i32, button: &str) {
     mouse_move_to(x, y);
     
@@ -246,6 +294,22 @@ fn main() {
                     let y: i32 = parts[2].parse().unwrap_or(0);
                     let button = if parts.len() >= 4 { parts[3] } else { "left" };
                     mouse_click(x, y, button);
+                }
+            }
+            "mousedown" => {
+                if parts.len() >= 3 {
+                    let x: i32 = parts[1].parse().unwrap_or(0);
+                    let y: i32 = parts[2].parse().unwrap_or(0);
+                    let button = if parts.len() >= 4 { parts[3] } else { "left" };
+                    mouse_down(x, y, button);
+                }
+            }
+            "mouseup" => {
+                if parts.len() >= 3 {
+                    let x: i32 = parts[1].parse().unwrap_or(0);
+                    let y: i32 = parts[2].parse().unwrap_or(0);
+                    let button = if parts.len() >= 4 { parts[3] } else { "left" };
+                    mouse_up(x, y, button);
                 }
             }
             "mousescroll" => {
