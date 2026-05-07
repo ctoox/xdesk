@@ -35,6 +35,10 @@ export class InputController {
       windowsHide: true
     });
 
+    this.process.stderr?.on('data', (data) => {
+      console.log(data.toString().trim());
+    });
+
     this.process.on('error', (err) => {
       console.error('[INPUT] Error:', err.message);
     });
@@ -55,20 +59,8 @@ export class InputController {
     this.send('mousemove ' + x + ' ' + y);
   }
 
-  mouseDown(x: number, y: number, button: string = 'left'): void {
-    this.send('mousedown ' + x + ' ' + y + ' ' + button);
-  }
-
-  mouseUp(x: number, y: number, button: string = 'left'): void {
-    this.send('mouseup ' + x + ' ' + y + ' ' + button);
-  }
-
   mouseClick(x: number, y: number, button: string = 'left'): void {
     this.send('mouseclick ' + x + ' ' + y + ' ' + button);
-  }
-
-  mouseDrag(startX: number, startY: number, endX: number, endY: number): void {
-    this.send('mousedrag ' + startX + ' ' + startY + ' ' + endX + ' ' + endY);
   }
 
   mouseScroll(x: number, y: number, direction: string = 'down'): void {
@@ -79,16 +71,12 @@ export class InputController {
     this.send('keypress ' + key);
   }
 
-  keyDown(key: string): void {
-    this.send('keydown ' + key);
-  }
-
-  keyUp(key: string): void {
-    this.send('keyup ' + key);
-  }
-
   typeText(text: string): void {
     this.send('typetext ' + text);
+  }
+
+  calibrate(offsetX: number, offsetY: number): void {
+    this.send('calibrate ' + offsetX + ' ' + offsetY);
   }
 
   stop(): void {

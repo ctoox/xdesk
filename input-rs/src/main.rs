@@ -11,6 +11,9 @@ extern "system" {
     fn GetSystemMetrics(nIndex: i32) -> i32;
 }
 
+static mut OFFSET_X: i32 = 0;
+static mut OFFSET_Y: i32 = 0;
+
 fn mouse_move_to(x: i32, y: i32) {
     unsafe {
         let vx = GetSystemMetrics(SM_XVIRTUALSCREEN);
@@ -18,14 +21,12 @@ fn mouse_move_to(x: i32, y: i32) {
         let vw = GetSystemMetrics(SM_CXVIRTUALSCREEN);
         let vh = GetSystemMetrics(SM_CYVIRTUALSCREEN);
         
-        // 调试输出
-        eprintln!("[MOUSE] input=({}, {}), virtual=({}, {}), size=({}, {})", x, y, vx, vy, vw, vh);
+        // 应用校准偏移
+        let x = x + OFFSET_X;
+        let y = y + OFFSET_Y;
         
-        // 归一化到 0-65535 范围
         let nx = ((x - vx) as i64 * 65535 / vw as i64) as i32;
         let ny = ((y - vy) as i64 * 65535 / vh as i64) as i32;
-        
-        eprintln!("[MOUSE] normalized=({}, {})", nx, ny);
         
         let input = INPUT {
             r#type: INPUT_MOUSE,
@@ -125,6 +126,9 @@ fn key_press(key: &str) {
             "f1" => VK_F1, "f2" => VK_F2, "f3" => VK_F3, "f4" => VK_F4,
             "f5" => VK_F5, "f6" => VK_F6, "f7" => VK_F7, "f8" => VK_F8,
             "f9" => VK_F9, "f10" => VK_F10, "f11" => VK_F11, "f12" => VK_F12,
+            "f13" => VK_F13, "f14" => VK_F14, "f15" => VK_F15, "f16" => VK_F16,
+            "f17" => VK_F17, "f18" => VK_F18, "f19" => VK_F19, "f20" => VK_F20,
+            "f21" => VK_F21, "f22" => VK_F22, "f23" => VK_F23, "f24" => VK_F24,
             "a" => VK_A, "b" => VK_B, "c" => VK_C, "d" => VK_D,
             "e" => VK_E, "f" => VK_F, "g" => VK_G, "h" => VK_H,
             "i" => VK_I, "j" => VK_J, "k" => VK_K, "l" => VK_L,
@@ -135,6 +139,27 @@ fn key_press(key: &str) {
             "0" => VK_0, "1" => VK_1, "2" => VK_2, "3" => VK_3,
             "4" => VK_4, "5" => VK_5, "6" => VK_6, "7" => VK_7,
             "8" => VK_8, "9" => VK_9,
+            "num0" => VK_NUMPAD0, "num1" => VK_NUMPAD1, "num2" => VK_NUMPAD2,
+            "num3" => VK_NUMPAD3, "num4" => VK_NUMPAD4, "num5" => VK_NUMPAD5,
+            "num6" => VK_NUMPAD6, "num7" => VK_NUMPAD7, "num8" => VK_NUMPAD8,
+            "num9" => VK_NUMPAD9,
+            "numlock" => VK_NUMLOCK,
+            "capslock" => VK_CAPITAL,
+            "scrolllock" => VK_SCROLL,
+            "printscreen" | "prtsc" => VK_SNAPSHOT,
+            "pause" => VK_PAUSE,
+            "apps" | "menu" => VK_APPS,
+            "+" | "=" => VK_OEM_PLUS,
+            "-" => VK_OEM_MINUS,
+            "," => VK_OEM_COMMA,
+            "." => VK_OEM_PERIOD,
+            "/" => VK_OEM_2,
+            ";" => VK_OEM_1,
+            "'" => VK_OEM_7,
+            "[" => VK_OEM_4,
+            "]" => VK_OEM_6,
+            "\\" => VK_OEM_5,
+            "`" => VK_OEM_3,
             _ => return,
         };
         
@@ -204,7 +229,7 @@ fn main() {
             Err(_) => break,
         };
 
-        let parts: Vec<&str> = line.trim().splitn(4, ' ').collect();
+        let parts: Vec<&str> = line.trim().splitn(5, ' ').collect();
         if parts.is_empty() { continue; }
 
         match parts[0] {
@@ -239,6 +264,15 @@ fn main() {
             "typetext" | "type" => {
                 if parts.len() >= 2 {
                     type_text(parts[1]);
+                }
+            }
+            "calibrate" => {
+                if parts.len() >= 3 {
+                    unsafe {
+                        OFFSET_X = parts[1].parse().unwrap_or(0);
+                        OFFSET_Y = parts[2].parse().unwrap_or(0);
+                        eprintln!("[CALIBRATE] offset=({}, {})", OFFSET_X, OFFSET_Y);
+                    }
                 }
             }
             "quit" => break,

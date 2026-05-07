@@ -148,6 +148,7 @@ async function main() {
   console.log('  peers         - List online peers');
   console.log('  share         - Share your screen');
   console.log('  stop          - Stop sharing');
+  console.log('  calibrate x y - Set mouse offset');
   console.log('  quit          - Exit');
   console.log('');
   console.log('Or use the web interface at http://localhost:8080');
@@ -208,6 +209,18 @@ async function main() {
       case 'stop':
         capture.stop();
         console.log('Stopped sharing');
+        break;
+
+      case 'calibrate':
+        if (parts.length < 3) {
+          console.log('Usage: calibrate <x_offset> <y_offset>');
+          console.log('Example: calibrate 100 -50');
+        } else {
+          const offsetX = parseInt(parts[1]) || 0;
+          const offsetY = parseInt(parts[2]) || 0;
+          input.calibrate(offsetX, offsetY);
+          console.log('Calibration set: offset=(' + offsetX + ', ' + offsetY + ')');
+        }
         break;
 
       case 'config':
