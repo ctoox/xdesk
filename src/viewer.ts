@@ -15,8 +15,6 @@ export class ScreenViewer {
   private onShell: ShellCallback | null = null;
   private onInput: InputCallback | null = null;
   private shellOutput: string = '';
-  private screenWidth: number = 1920;
-  private screenHeight: number = 1080;
 
   constructor(port: number = 8080) {
     this.port = port;
@@ -213,7 +211,7 @@ export class ScreenViewer {
     <main class="main">
       <div class="screen-container">
         <div class="screen-frame">
-          <img id="screen" src="" alt="Waiting for screen...">
+          <img id="screen" src="" alt="Waiting...">
           <div id="overlay"></div>
           <div class="screen-badge">
             <div class="badge-dot"></div>
@@ -267,24 +265,71 @@ export class ScreenViewer {
     var frames = 0, lastSec = Date.now(), lastFrame = Date.now();
     var lastOut = '', startTime = Date.now(), lastBw = Date.now(), bytes = 0;
 
-    // 坐标转换：网页坐标 -> 屏幕坐标
+    // 存储远程屏幕的实际分辨率
+    var remoteWidth = 1920;
+    var remoteHeight = 1080;
+
+    // 图片加载完成后更新分辨率
+    img.onload = function() {
+      remoteWidth = img.naturalWidth;
+      remoteHeight = img.naturalHeight;
+      resEl.textContent = remoteWidth + 'x' + remoteHeight;
+    };
+
+    /**
+     * 坐标转换：网页鼠标位置 -> 远程屏幕坐标
+     * 
+     * 需要考虑的因素：
+     * 1. overlay 元素的位置和大小
+     * 2. 图像在 overlay 中的显示区域（object-fit: contain 会留黑边）
+     * 3. 远程屏幕的实际分辨率
+     */
     function getCoords(e) {
-      var rect = overlay.getBoundingClientRect();
+      var overlayRect = overlay.getBoundingClientRect();
       
-      // 鼠标相对于 overlay 的位置 (0-1)
-      var relX = (e.clientX - rect.left) / rect.width;
-      var relY = (e.clientY - rect.top) / rect.height;
+      // 鼠标相对于 overlay 左上角的像素位置
+      var mouseX = e.clientX - overlayRect.left;
+      var mouseY = e.clientY - overlayRect.top;
+      
+      // overlay 的显示尺寸
+      var overlayW = overlayRect.width;
+      var overlayH = overlayRect.height;
+      
+      // 计算图像在 overlay 中的实际显示区域（考虑 object-fit: contain）
+      var imgAspect = remoteWidth / remoteHeight;
+      var overlayAspect = overlayW / overlayH;
+      
+      var displayW, displayH, offsetX, offsetY;
+      
+      if (imgAspect > overlayAspect) {
+        // 图像更宽，以宽度为准，上下有黑边
+        displayW = overlayW;
+        displayH = overlayW / imgAspect;
+        offsetX = 0;
+        offsetY = (overlayH - displayH) / 2;
+      } else {
+        // 图像更高，以高度为准，左右有黑边
+        displayH = overlayH;
+        displayW = overlayH * imgAspect;
+        offsetX = (overlayW - displayW) / 2;
+        offsetY = 0;
+      }
+      
+      // 鼠标相对于图像显示区域的位置
+      var imgX = mouseX - offsetX;
+      var imgY = mouseY - offsetY;
+      
+      // 转换为 0-1 的比例
+      var relX = imgX / displayW;
+      var relY = imgY / displayH;
       
       // 限制在 0-1 范围内
       relX = Math.max(0, Math.min(1, relX));
       relY = Math.max(0, Math.min(1, relY));
       
-      // 转换为实际屏幕坐标
-      var screenW = img.naturalWidth || 1920;
-      var screenH = img.naturalHeight || 1080;
-      
-      var x = Math.round(relX * screenW);
-      var y = Math.round(relY * screenH);
+      // 转换为远程屏幕坐标
+      var x = Math.round(relX * remoteWidth);
+      var y = Math.round(relY * remoteHeight);
       
       // 更新坐标显示
       coordsEl.textContent = x + ',' + y;
@@ -306,7 +351,7 @@ export class ScreenViewer {
       sendInput({ action: 'mousemove', x: p.x, y: p.y });
     });
 
-    // 鼠标点击
+    // 鼠标按下
     overlay.addEventListener('mousedown', function(e) {
       e.preventDefault();
       var p = getCoords(e);
@@ -314,7 +359,7 @@ export class ScreenViewer {
       sendInput({ action: 'mouseclick', x: p.x, y: p.y, button: button });
     });
 
-    // 鼠标释放（用于拖放）
+    // 鼠标释放
     overlay.addEventListener('mouseup', function(e) {
       e.preventDefault();
       var p = getCoords(e);
@@ -322,30 +367,10 @@ export class ScreenViewer {
       sendInput({ action: 'mouseup', x: p.x, y: p.y, button: button });
     });
 
-    // 拖放支持
-    overlay.addEventListener('dragstart', function(e) {
-      e.preventDefault();
-      var p = getCoords(e);
-      sendInput({ action: 'dragstart', x: p.x, y: p.y });
-    });
-
-    overlay.addEventListener('drag', function(e) {
-      e.preventDefault();
-      var p = getCoords(e);
-      sendInput({ action: 'drag', x: p.x, y: p.y });
-    });
-
-    overlay.addEventListener('dragend', function(e) {
-      e.preventDefault();
-      var p = getCoords(e);
-      sendInput({ action: 'dragend', x: p.x, y: p.y });
-    });
-
     // 滚轮
     overlay.addEventListener('wheel', function(e) {
       e.preventDefault();
-      var p = getCoords(e);
-      sendInput({ action: 'mousescroll', x: p.x, y: p.y, direction: e.deltaY < 0 ? 'up' : 'down' });
+      sendInput({ action: 'mousescroll', x: 0, y: 0, direction: e.deltaY < 0 ? 'up' : 'down' });
     });
 
     // 禁用右键菜单
@@ -356,12 +381,6 @@ export class ScreenViewer {
       if (e.target === cmdEl) return;
       e.preventDefault();
       sendInput({ action: 'keypress', key: e.key });
-    });
-
-    document.addEventListener('keyup', function(e) {
-      if (e.target === cmdEl) return;
-      e.preventDefault();
-      sendInput({ action: 'keyup', key: e.key });
     });
 
     // 终端输入
@@ -402,9 +421,6 @@ export class ScreenViewer {
           fpsEl.textContent = frames;
           frames = 0;
           lastSec = now;
-        }
-        if (img.naturalWidth) {
-          resEl.textContent = img.naturalWidth + 'x' + img.naturalHeight;
         }
         pendingFrame = null;
         rendering = false;
@@ -449,7 +465,6 @@ export class ScreenViewer {
     }
     setInterval(updateStats, 1000);
 
-    // UI 功能
     function toggleSidebar() {
       sidebar.style.display = sidebar.style.display === 'none' ? 'flex' : 'none';
     }
@@ -459,7 +474,6 @@ export class ScreenViewer {
       else document.exitFullscreen();
     }
 
-    // 启动
     connect();
   </script>
 </body>

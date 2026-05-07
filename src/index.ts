@@ -5,7 +5,8 @@ import { ScreenViewer } from './viewer';
 import { executeCommand } from './shell';
 import { FFmpegCapture } from './ffmpeg-capture';
 import { InputController } from './input';
-import { loadConfig, Config } from './config';
+import { loadConfig } from './config';
+import { formatId, parseId } from './id';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -19,10 +20,7 @@ function prompt(prefix: string): Promise<string> {
 }
 
 async function main() {
-  // Load config
   const config = loadConfig();
-  
-  // Override with command line args
   const args = process.argv.slice(2);
   if (args[0]) config.proxy = args[0];
   
@@ -31,10 +29,6 @@ async function main() {
   console.log('');
   console.log('========================================');
   console.log('  xdesk - Remote Desktop');
-  console.log('========================================');
-  console.log('  Server: ' + config.signal_server);
-  console.log('  Room: ' + config.room);
-  console.log('  FPS: ' + config.fps);
   console.log('========================================');
   console.log('');
 
@@ -55,7 +49,10 @@ async function main() {
 
   const clientId = client.getClientId();
   if (clientId) {
-    console.log('Your ID: ' + clientId);
+    const shortId = clientId.substring(0, 9);
+    console.log('========================================');
+    console.log('  Your ID: ' + formatId(shortId));
+    console.log('========================================');
     console.log('');
   }
 
@@ -107,7 +104,6 @@ async function main() {
         case 'mouseup': input.mouseUp(x, y, button); break;
         case 'mousescroll': input.mouseScroll(x, y, direction); break;
         case 'keypress': input.keyPress(key); break;
-        case 'keyup': input.keyUp(key); break;
         case 'typetext': input.typeText(text); break;
       }
     }
@@ -139,7 +135,7 @@ async function main() {
   });
 
   console.log('Commands:');
-  console.log('  connect <id>  - Connect to peer');
+  console.log('  connect <id>  - Connect to peer (e.g., connect 123-456-789)');
   console.log('  peers         - List online peers');
   console.log('  share         - Share your screen');
   console.log('  stop          - Stop sharing');
@@ -155,12 +151,28 @@ async function main() {
     switch (parts[0]) {
       case 'connect':
         if (parts.length < 2) {
-          console.log('Usage: connect <peer-id>');
+          console.log('Usage: connect <id>');
+          console.log('Example: connect 123-456-789');
         } else {
-          targetPeer = parts[1];
-          console.log('Connected to: ' + targetPeer);
-          client.send({ type: 'screen-request', to: targetPeer, data: { fps: config.fps } });
-          console.log('Requesting screen...');
+          const rawId = parseId(parts[1]);
+          if (rawId.length < 9) {
+            // 部分匹配，查找在线的 peer
+            const peers = client.getPeers();
+            const match = peers.find(p => p.startsWith(rawId));
+            if (match) {
+              targetPeer = match;
+              console.log('Connected to: ' + formatId(match));
+              client.send({ type: 'screen-request', to: targetPeer, data: { fps: config.fps } });
+              console.log('Requesting screen...');
+            } else {
+              console.log('No peer found starting with: ' + rawId);
+            }
+          } else {
+            targetPeer = rawId;
+            console.log('Connected to: ' + formatId(targetPeer));
+            client.send({ type: 'screen-request', to: targetPeer, data: { fps: config.fps } });
+            console.log('Requesting screen...');
+          }
         }
         break;
 
@@ -170,7 +182,7 @@ async function main() {
           console.log('No peers online');
         } else {
           console.log('Online peers:');
-          peers.forEach(p => console.log('  ' + p));
+          peers.forEach(p => console.log('  ' + formatId(p)));
         }
         break;
 
