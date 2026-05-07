@@ -321,19 +321,17 @@ export class ScreenViewer {
     }, 300);
 
     // Use SSE for real-time updates
-    function connect() {
-      var es = new EventSource('/stream');
-      es.onopen = function() {
-        statusEl.textContent = 'Connected';
-        connEl.textContent = 'Connected';
-        document.querySelector('.badge-dot').style.background = '#22c55e';
-      };
-      es.onmessage = function(e) {
+    var pendingFrame = null;
+    var rendering = false;
+
+    function renderFrame() {
+      if (pendingFrame && !rendering) {
+        rendering = true;
         var now = Date.now();
         latEl.textContent = Math.min(now-lastFrame, 999) + 'ms';
         lastFrame = now;
-        img.src = 'data:image/jpeg;base64,' + e.data;
-        bytes += e.data.length;
+        img.src = 'data:image/jpeg;base64,' + pendingFrame;
+        bytes += pendingFrame.length;
         frames++;
         if (now-lastSec >= 1000) {
           fpsEl.textContent = frames;
@@ -343,6 +341,23 @@ export class ScreenViewer {
         if (img.naturalWidth) {
           resEl.textContent = img.naturalWidth + 'x' + img.naturalHeight;
         }
+        pendingFrame = null;
+        rendering = false;
+      }
+      requestAnimationFrame(renderFrame);
+    }
+    requestAnimationFrame(renderFrame);
+
+    function connect() {
+      var es = new EventSource('/stream');
+      es.onopen = function() {
+        statusEl.textContent = 'Connected';
+        connEl.textContent = 'Connected';
+        document.querySelector('.badge-dot').style.background = '#22c55e';
+      };
+      es.onmessage = function(e) {
+        // Just store latest frame, don't queue
+        pendingFrame = e.data;
       };
       es.onerror = function() {
         statusEl.textContent = 'Reconnecting...';

@@ -21,7 +21,7 @@ function prompt(prefix: string): Promise<string> {
 
 async function main(proxyUrl?: string) {
   const client = new SignalClient(SIGNAL_URL, proxyUrl);
-  const capture = new FFmpegCapture(0, 0, 60, 3);
+  const capture = new FFmpegCapture(0, 0, 15, 3);
   const viewer = new ScreenViewer(8080);
   const input = new InputController();
   
