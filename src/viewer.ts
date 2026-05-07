@@ -1,5 +1,6 @@
 import * as http from 'http';
 import { exec } from 'child_process';
+import { WebSocketServer, WebSocket } from 'ws';
 
 export type ShellCallback = (command: string) => void;
 export type InputCallback = (action: string, data: any) => void;
@@ -7,9 +8,11 @@ export type ConnectCallback = (peerId: string) => void;
 
 export class ScreenViewer {
   private server: http.Server | null = null;
+  private wss: WebSocketServer | null = null;
   private port: number;
   private currentFrame: string | null = null;
   private clients: Set<http.ServerResponse> = new Set();
+  private wsClients: Set<WebSocket> = new Set();
   private frameCount: number = 0;
   private startTime: number = 0;
   private lastFpsUpdate: number = 0;
@@ -147,6 +150,23 @@ export class ScreenViewer {
       console.log('Viewer: http://localhost:' + this.port);
     });
 
+    // WebSocket server for low-latency input
+    this.wss = new WebSocketServer({ server: this.server });
+    this.wss.on('connection', (ws) => {
+      this.wsClients.add(ws);
+      ws.on('message', (data) => {
+        try {
+          const msg = JSON.parse(data.toString());
+          if (msg.type === 'input' && this.onInput) {
+            this.onInput(msg.action, msg);
+          } else if (msg.type === 'shell' && this.onShell) {
+            this.onShell(msg.command);
+          }
+        } catch (e) {}
+      });
+      ws.on('close', () => { this.wsClients.delete(ws); });
+    });
+
     setInterval(() => {
       const now = Date.now();
       const elapsed = (now - this.lastFpsUpdate) / 1000;
@@ -162,11 +182,20 @@ export class ScreenViewer {
     this.currentFrame = frameBase64;
     this.frameCount++;
     
+    // Send via SSE (legacy)
     for (const client of this.clients) {
       try { 
         client.write('data: ' + frameBase64 + '\n\n'); 
       } catch (e) { 
         this.clients.delete(client); 
+      }
+    }
+    
+    // Send via WebSocket (faster)
+    const wsMsg = JSON.stringify({ type: 'frame', data: frameBase64 });
+    for (const ws of this.wsClients) {
+      if (ws.readyState === WebSocket.OPEN) {
+        try { ws.send(wsMsg); } catch (e) { this.wsClients.delete(ws); }
       }
     }
   }
@@ -491,33 +520,79 @@ export class ScreenViewer {
       var x = Math.round(relX * remoteWidth);
       var y = Math.round(relY * remoteHeight);
       
-      // 调试日志（每10次输出一次）
-      if (Math.random() < 0.1) {
-        console.log('Mouse:', mouseX.toFixed(0), mouseY.toFixed(0),
-                    'Display:', displayW.toFixed(0), displayH.toFixed(0),
-                    'Offset:', offsetX.toFixed(0), offsetY.toFixed(0),
-                    'Rel:', relX.toFixed(3), relY.toFixed(3),
-                    'Remote:', x, y);
-      }
-      
       coordsEl.textContent = x + ',' + y;
       return { x: x, y: y };
     }
 
+    // WebSocket connection for low-latency input
+    var ws = null;
+    var wsReady = false;
+    function connectWs() {
+      ws = new WebSocket('ws://' + location.host);
+      ws.onopen = function() { wsReady = true; console.log('WebSocket connected'); };
+      ws.onclose = function() { wsReady = false; setTimeout(connectWs, 1000); };
+      ws.onerror = function() { wsReady = false; };
+      
+      // Receive frames via WebSocket
+      ws.onmessage = function(e) {
+        try {
+          var msg = JSON.parse(e.data);
+          if (msg.type === 'frame') {
+            if (pendingFrame === null) {
+              pendingFrame = msg.data;
+              requestAnimationFrame(renderFrame);
+            } else {
+              pendingFrame = msg.data;
+            }
+          }
+        } catch (err) {}
+      };
+    }
+    connectWs();
+
     function sendInput(d) {
-      fetch('/input', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+      if (wsReady && ws) {
+        ws.send(JSON.stringify(d));
+      } else {
+        fetch('/input', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+      }
     }
 
-    overlay.addEventListener('mousemove', function(e) { var p = getCoords(e); sendInput({ action: 'mousemove', x: p.x, y: p.y }); });
-    overlay.addEventListener('mousedown', function(e) { e.preventDefault(); var p = getCoords(e); sendInput({ action: 'mousedown', x: p.x, y: p.y, button: e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle' }); });
-    overlay.addEventListener('mouseup', function(e) { e.preventDefault(); var p = getCoords(e); sendInput({ action: 'mouseup', x: p.x, y: p.y, button: e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle' }); });
-    overlay.addEventListener('wheel', function(e) { e.preventDefault(); sendInput({ action: 'mousescroll', x: 0, y: 0, direction: e.deltaY < 0 ? 'up' : 'down' }); });
+    // Mousemove throttling - max once per 16ms (~60fps)
+    var lastMoveTime = 0;
+    var pendingMove = null;
+    var moveTimer = null;
+    
+    function throttledMove(x, y) {
+      var now = Date.now();
+      if (now - lastMoveTime >= 16) {
+        lastMoveTime = now;
+        sendInput({ type: 'input', action: 'mousemove', x: x, y: y });
+      } else {
+        pendingMove = { x: x, y: y };
+        if (!moveTimer) {
+          moveTimer = setTimeout(function() {
+            if (pendingMove) {
+              lastMoveTime = Date.now();
+              sendInput({ type: 'input', action: 'mousemove', x: pendingMove.x, y: pendingMove.y });
+              pendingMove = null;
+            }
+            moveTimer = null;
+          }, 16);
+        }
+      }
+    }
+
+    overlay.addEventListener('mousemove', function(e) { var p = getCoords(e); throttledMove(p.x, p.y); });
+    overlay.addEventListener('mousedown', function(e) { e.preventDefault(); var p = getCoords(e); sendInput({ type: 'input', action: 'mousedown', x: p.x, y: p.y, button: e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle' }); });
+    overlay.addEventListener('mouseup', function(e) { e.preventDefault(); var p = getCoords(e); sendInput({ type: 'input', action: 'mouseup', x: p.x, y: p.y, button: e.button === 0 ? 'left' : e.button === 2 ? 'right' : 'middle' }); });
+    overlay.addEventListener('wheel', function(e) { e.preventDefault(); sendInput({ type: 'input', action: 'mousescroll', x: 0, y: 0, direction: e.deltaY < 0 ? 'up' : 'down' }); });
     overlay.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
     document.addEventListener('keydown', function(e) {
       if (e.target === cmdEl || e.target === connectIdEl) return;
       e.preventDefault();
-      sendInput({ action: 'keypress', key: e.key });
+      sendInput({ type: 'input', action: 'keypress', key: e.key });
     });
 
     cmdEl.addEventListener('keydown', function(e) {
@@ -526,7 +601,7 @@ export class ScreenViewer {
         if (c) {
           outEl.textContent += '$ ' + c + '\\n';
           outEl.scrollTop = outEl.scrollHeight;
-          fetch('/shell', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: c }) });
+          sendInput({ type: 'shell', command: c });
           cmdEl.value = '';
         }
       }
@@ -555,13 +630,17 @@ export class ScreenViewer {
     }
     requestAnimationFrame(renderFrame);
 
-    function connect() {
+    // SSE fallback for frame receiving (WebSocket is primary)
+    function connectSse() {
+      if (wsReady) return; // Skip if WebSocket is working
       var es = new EventSource('/stream');
-      es.onopen = function() { statusEl.textContent = 'Connected'; connEl.textContent = 'Connected'; };
-      es.onmessage = function(e) { pendingFrame = e.data; };
-      es.onerror = function() { statusEl.textContent = 'Reconnecting...'; es.close(); setTimeout(connect, 2000); };
+      es.onopen = function() { if (!wsReady) { statusEl.textContent = 'Connected (SSE)'; connEl.textContent = 'Connected'; } };
+      es.onmessage = function(e) { if (!wsReady) { pendingFrame = e.data; } };
+      es.onerror = function() { if (!wsReady) { statusEl.textContent = 'Reconnecting...'; } es.close(); setTimeout(connectSse, 2000); };
     }
-    connect();
+    
+    // Start SSE after a delay if WebSocket isn't connected
+    setTimeout(function() { if (!wsReady) connectSse(); }, 1000);
 
     function updateStats() {
       var now = Date.now();
