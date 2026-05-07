@@ -384,6 +384,7 @@ export class ScreenViewer {
     var frames = 0, lastSec = Date.now(), lastFrame = Date.now();
     var lastOut = '', startTime = Date.now(), lastBw = Date.now(), bytes = 0;
     var remoteWidth = 1920, remoteHeight = 1080;
+    var dpiScale = 1.0;
 
     // 获取我的 ID
     fetch('/api/id').then(function(r) { return r.json(); }).then(function(d) {
@@ -441,7 +442,23 @@ export class ScreenViewer {
       remoteWidth = img.naturalWidth;
       remoteHeight = img.naturalHeight;
       resEl.textContent = remoteWidth + 'x' + remoteHeight;
+      detectDpiScale();
     };
+
+    function detectDpiScale() {
+      var scales = [1.0, 1.25, 1.5, 1.75, 2.0];
+      var ratioX = remoteWidth / 1920;
+      var ratioY = remoteHeight / 1080;
+      var ratio = (ratioX + ratioY) / 2;
+      var closest = 1.0;
+      var minDiff = Infinity;
+      for (var i = 0; i < scales.length; i++) {
+        var diff = Math.abs(ratio - scales[i]);
+        if (diff < minDiff) { minDiff = diff; closest = scales[i]; }
+      }
+      dpiScale = closest;
+      console.log('DPI scale: ' + (dpiScale * 100) + '%');
+    }
 
     function getCoords(e) {
       var rect = overlay.getBoundingClientRect();
