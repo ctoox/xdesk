@@ -35,7 +35,34 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build Rust capture module
+        run: |
+          cd capture-rs
+          cargo build --release
+        shell: bash
+
+      - name: Build Rust input module
+        run: |
+          cd input-rs
+          cargo build --release
+        shell: bash
+
+      - name: Copy Rust binaries
+        run: |
+          mkdir -p bin
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            cp capture-rs/target/release/xdesk-capture.exe bin/
+            cp input-rs/target/release/xdesk-input.exe bin/
+          else
+            cp capture-rs/target/release/xdesk-capture bin/
+            cp input-rs/target/release/xdesk-input bin/
+          fi
+        shell: bash
+
+      - name: Install npm dependencies
         run: npm install
 
       - name: Build TypeScript
@@ -55,7 +82,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: ${{ matrix.artifact_name }}
+          path: |
+            ${{ matrix.artifact_name }}
+            bin/
 
   release:
     needs: build
@@ -72,9 +101,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/xdesk-windows-x64.exe/xdesk-windows-x64.exe
-            artifacts/xdesk-linux-x64/xdesk-linux-x64
-            artifacts/xdesk-macos/xdesk-macos
+            artifacts/xdesk-windows-x64.exe/*
+            artifacts/xdesk-linux-x64/*
+            artifacts/xdesk-macos/*
           draft: false
           prerelease: false
         env:

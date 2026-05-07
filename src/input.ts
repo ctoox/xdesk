@@ -1,5 +1,6 @@
 import { spawn, ChildProcess } from 'child_process';
 import * as path from 'path';
+import * as fs from 'fs';
 
 export class InputController {
   private process: ChildProcess | null = null;
@@ -7,7 +8,28 @@ export class InputController {
   start(): void {
     if (this.process) return;
 
-    const exePath = path.join(__dirname, '..', 'input-rs', 'target', 'release', 'xdesk-input.exe');
+    // Try to find xdesk-input binary
+    const possiblePaths = [
+      path.join(__dirname, '..', 'bin', 'xdesk-input.exe'),
+      path.join(__dirname, '..', 'input-rs', 'target', 'release', 'xdesk-input.exe'),
+      path.join(__dirname, '..', 'bin', 'xdesk-input'),
+      path.join(__dirname, '..', 'input-rs', 'target', 'release', 'xdesk-input'),
+    ];
+
+    let exePath = '';
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        exePath = p;
+        break;
+      }
+    }
+
+    if (!exePath) {
+      console.log('[INPUT] xdesk-input binary not found, input control disabled');
+      return;
+    }
+
+    console.log('[INPUT] Using: ' + exePath);
     
     this.process = spawn(exePath, [], {
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -31,23 +53,23 @@ export class InputController {
   }
 
   mouseMove(x: number, y: number): void {
-    this.send(`mousemove ${x} ${y}`);
+    this.send('mousemove ' + x + ' ' + y);
   }
 
   mouseClick(x: number, y: number, button: string = 'left'): void {
-    this.send(`mouseclick ${x} ${y} ${button}`);
+    this.send('mouseclick ' + x + ' ' + y + ' ' + button);
   }
 
   mouseScroll(x: number, y: number, direction: string = 'down'): void {
-    this.send(`mousescroll ${x} ${y} ${direction}`);
+    this.send('mousescroll ' + x + ' ' + y + ' ' + direction);
   }
 
   keyPress(key: string): void {
-    this.send(`keypress ${key}`);
+    this.send('keypress ' + key);
   }
 
   typeText(text: string): void {
-    this.send(`typetext ${text}`);
+    this.send('typetext ' + text);
   }
 
   stop(): void {
