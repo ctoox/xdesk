@@ -33,7 +33,7 @@ async function main() {
   console.log('');
 
   const client = new SignalClient(signalUrl, config.proxy || undefined);
-  const capture = new FFmpegCapture(0, 0, config.fps, config.quality);
+  let capture = new FFmpegCapture(0, 0, config.fps, config.quality);
   const viewer = new ScreenViewer(8080);
   const input = new InputController();
   
@@ -138,8 +138,24 @@ async function main() {
 
   viewer.setSettingsCallback((settings) => {
     console.log('[SETTINGS] Update:', settings);
-    // TODO: Restart capture with new settings
-    // For now, just log the change
+    if (settings.fps) config.fps = Math.max(1, Math.min(60, settings.fps));
+    if (settings.quality) config.quality = Math.max(1, Math.min(31, settings.quality));
+    
+    // Restart capture with new settings
+    if (targetPeer) {
+      capture.stop();
+      capture = new FFmpegCapture(0, 0, config.fps, config.quality);
+      const res = capture.getResolution();
+      capture.start((frame) => {
+        if (!targetPeer) return;
+        client.send({
+          type: 'screen',
+          to: targetPeer,
+          data: { frame: frame.toString('base64') }
+        });
+      });
+      console.log('[SETTINGS] Capture restarted: fps=' + config.fps + ', quality=' + config.quality);
+    }
   });
 
   // 启动 viewer 并打开浏览器
